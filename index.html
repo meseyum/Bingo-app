@@ -67,7 +67,7 @@
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s;
         }
         .number-btn.selected {
             background-color: #ffcc00;
@@ -125,9 +125,11 @@
     <button class="confirm-btn" onclick="confirmTicket()">ምርጫዬን አረጋግጣለሁ (Confirm Ticket)</button>
 
     <script>
+        // የቴሌግራም ዌብ አፕን በጃቫስክሪፕት ማገናኘት
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // ቀሪ ሒሳብን ከቦቱ ተቀብሎ ማሳያ
         const urlParams = new URLSearchParams(window.location.search);
         const currentBalance = urlParams.get('balance') || "100";
         document.getElementById('main-balance').innerText = currentBalance + " ብር";
@@ -135,6 +137,7 @@
         let marked_numbers = [];
         const grid = document.getElementById('bingo-grid');
 
+        // የቁጥሮች ሰሌዳ መፍጠሪያ
         for (let i = 1; i <= 100; i++) {
             const btn = document.createElement('button');
             btn.className = 'number-btn';
@@ -159,14 +162,21 @@
             }
         }
 
-        // 🔴 ይህ ፈንክሽን ነው መረጃውን ወደ ቴሌግራም የሚልከው
+        // 🔴 ዋናው ማስተካከያ፡ መረጃውን ልኮ እንዲዘጋ የሚያደርገው ፈንክሽን
         function confirmTicket() {
             if (marked_numbers.length === 0) {
                 alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
                 return;
             }
-            let webAppData = { "marked_numbers": marked_numbers };
+
+            // መረጃውን በ ቴሌግራም ፎርማት ማዘጋጀት
+            let webAppData = {
+                "marked_numbers": marked_numbers
+            };
+
+            // 1. መረጃውን ወደ ፓይተን ቦቱ ይልካል
             tg.sendData(JSON.stringify(webAppData));
+            // 2. ዌብ አፑን ይዘጋዋል
             tg.close();
         }
     </script>
