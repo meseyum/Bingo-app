@@ -1,190 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Bingo Classic</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+    <title>Super Bingo 2026 Board</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Exact layout colors matching image reference 1000006680.jpg */
         body {
-            background-color: #f3f4f6;
-            color: #333;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            text-align: center;
+            background-color: #0b0920; 
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 12px;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
         }
-        .header-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #111827;
-            margin: 10px 0 5px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        /* Top Metrics Row Panel Styling */
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #4b5563;
             margin-bottom: 20px;
         }
-        .bingo-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            max-width: 360px;
-            margin: 0 auto;
+        .metric-card {
+            background-color: #16133a;
+            border: 1px solid #231f5c;
+            border-radius: 8px;
+            padding: 10px 4px;
         }
-        .bingo-headers {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 8px;
+        .metric-title {
+            font-size: 10px;
+            color: #7d79b0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
-        .letter-header {
-            font-size: 22px;
+        .metric-value {
+            font-size: 14px;
             font-weight: 900;
-            color: #ea580c; /* Matching your orange text header style */
+            color: #ffcc00;
         }
-        .bingo-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-        }
-        .cell {
-            background-color: #ffffff;
-            border: 2px solid #d1d5db;
-            border-radius: 8px;
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
+
+        /* Subheading text matching image amharic typography label */
+        .board-title {
+            font-size: 20px;
             font-weight: bold;
-            color: #111827;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.1s ease;
-        }
-        /* Active clicked matching tile layout color change state */
-        .cell.marked {
-            background-color: #3b82f6;
-            color: white;
-            border-color: #2563eb;
-        }
-        .cell.free-space {
-            background-color: #22c55e;
-            color: white;
-            border-color: #16a34a;
-            font-size: 12px;
-            font-weight: 800;
-        }
-        .action-btn {
-            background-color: #0284c7; /* Sky blue matching layout button */
-            color: white;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            border: none;
-            margin: 25px auto 10px auto;
-            max-width: 360px;
-            display: block;
-            width: 100%;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .action-btn:active {
-            transform: scale(0.98);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header-title">🎰 Telegram Bingo 🎰</div>
-    <div class="subtitle">Tap tiles to match the called numbers!</div>
-
-    <div class="bingo-card">
-        <div class="bingo-headers">
-            <div class="letter-header">B</div>
-            <div class="letter-header">I</div>
-            <div class="letter-header">N</div>
-            <div class="letter-header">G</div>
-            <div class="letter-header">O</div>
-        </div>
-
-        <div class="bingo-grid" id="board-matrix"></div>
-    </div>
-
-    <button class="action-btn" onclick="submitClaim()">Check My Card (Claim Win)</button>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        const gridContainer = document.getElementById('board-matrix');
-        let markedCells = ["FREE"]; // The center space is auto-marked
-
-        // Traditional mathematical layout intervals generation ranges 
-        const ranges = [
-            { min: 1, max: 15 },   // B
-            { min: 16, max: 30 },  // I
-            { min: 31, max: 45 },  // N
-            { min: 46, max: 60 },  // G
-            { min: 61, max: 75 }   // O
-        ];
-
-        // Generate clean random distinct numbers for a standard card column configuration
-        function generateColumnNumbers(min, max) {
-            let pool = [];
-            for (let i = min; i <= max; i++) pool.push(i);
-            
-            let shuffled = pool.sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, 5);
-        }
-
-        // Build the 5 columns data tracking matrix lists array
-        const columnsData = ranges.map(r => generateColumnNumbers(r.min, r.max));
-
-        // Generate the full board row-by-row onto visual layout space display context matrix
-        for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 5; col++) {
-                const cellElement = document.createElement('div');
-                
-                // Handle the middle column center cell element configuration rule ("FREE")
-                if (row === 2 && col === 2) {
-                    cellElement.className = 'cell free-space';
-                    cellElement.innerText = 'FREE';
-                } else {
-                    const numberValue = columnsData[col][row];
-                    cellElement.className = 'cell';
-                    cellElement.innerText = numberValue;
-
-                    // Toggle marking when cell is clicked
-                    cellElement.addEventListener('click', () => {
-                        if (cellElement.classList.contains('marked')) {
-                            cellElement.classList.remove('marked');
-                            markedCells = markedCells.filter(n => n !== numberValue);
-                        } else {
-                            cellElement.classList.add('marked');
-                            markedCells.push(numberValue);
-                        }
-                    });
-                }
-                gridContainer.appendChild(cellElement);
-            }
-        }
-
-        // Return chosen values profile straight to backend script and close panel window container space
-        function submitClaim() {
-            const finalPayload = JSON.stringify({
-                claimed_win: true,
-                marked_numbers: markedCells
-            });
-            tg.sendData(finalPayload);
-        }
-    </script>
-</body>
-</html>
+            color: #ffffff;
+            margin: 15px 0;
+            letter
