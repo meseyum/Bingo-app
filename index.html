@@ -6,13 +6,24 @@
     <title>Super Bingo Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
+        body {<audio id="win-sound" src="win.mp3" preload="auto"></audio>
+<audio id="click-sound" src="click.mp3" preload="auto"></audio>
             background-color: #0b0920; 
             color: #ffffff;
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 12px;
-            text-align: center;
+            text-align: center;function executeSubmission() {
+    // ቁልፉ ሲነካ የክሊክ ድምፅ ያጫውታል
+    document.getElementById('click-sound').play(); 
+    
+    if (pickedNumbersList.length === 0) {
+        alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
+        return;
+    }
+    tg.sendData(JSON.stringify({ marked_numbers: pickedNumbersList }));
+}
+
         }
 
         /* Dashboard Metrics Cards Row (Ref: Image 1000006680.jpg) */
