@@ -111,7 +111,29 @@
 
         /* Main Confirm Button Layout Setup Grid Row */
         .action-dispatch-btn {
-            background-color: #27ae60;
+            background-color: #function confirmTicket() {
+    // ተጠቃሚው የመረጣቸውን ቁጥሮች ዝርዝር ይይዛል
+    let selectedNumbers = marked_numbers; 
+
+    if (selectedNumbers.length === 0) {
+        alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
+        return;
+    }
+
+    // 🔴 ዋናው ክፍል፦ ቁጥሮቹን በ JSON ፎርማት ወደ ቴሌግራም ቦት መላኪያ
+    if (window.Telegram && window.Telegram.WebApp) {
+        let webAppData = {
+            "marked_numbers": selectedNumbers
+        };
+        
+        // ዳታውን ወደ ቦቱ ይልካል፣ ዌብ አፑንም ይዘጋል
+        window.Telegram.WebApp.sendData(JSON.stringify(webAppData));
+        window.Telegram.WebApp.close();
+    } else {
+        alert("እባክዎ ጨዋታውን በቴሌግራም ቦት ውስጥ ይክፈቱት!");
+    }
+}
+;
             color: #ffffff;
             font-size: 17px;
             font-weight: bold;
