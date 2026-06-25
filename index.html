@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
-    <title>Super Bingo 2026 Board</title>
+    <title>Super Bingo Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             background-color: #0b0920; 
             color: #ffffff;
-            font-family: Arial, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 12px;
             text-align: center;
         }
 
-        /* Top Dashboards Info Row */
+        /* Dashboard Metrics Cards Row (Ref: Image 1000006680.jpg) */
         .metrics-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -46,7 +46,7 @@
             margin: 15px 0;
         }
 
-        /* 1-100 Grid Area Layout Matrix */
+        /* 1-100 Grid System Layout Matrix Container */
         .grid-matrix {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
@@ -56,9 +56,10 @@
             background-color: #060514;
             padding: 12px;
             border-radius: 12px;
+            border: 1px solid #131035;
         }
 
-        /* Orange Tiles */
+        /* Standard Orange Grid Tiles */
         .tile-button {
             background-color: #d35400;
             color: #ffffff;
@@ -71,14 +72,20 @@
             border-radius: 6px;
             cursor: pointer;
             user-select: none;
+            transition: background-color 0.1s, transform 0.1s;
+        }
+        .tile-button:active {
+            transform: scale(0.9);
         }
 
-        /* Yellow Selected State */
+        /* Selected Active Bright Yellow Grid Tile Layout */
         .tile-button.selected-active {
             background-color: #f1c40f !important;
             color: #000000 !important;
+            box-shadow: 0 0 5px #f1c40f;
         }
 
+        /* Selection Status Tracker Panel Label Box */
         .bottom-tracker-bar {
             background-color: #0f0d2c;
             border: 1px solid #1c184e;
@@ -91,6 +98,7 @@
             margin: 20px auto 10px auto;
         }
 
+        /* Main Confirm Button Layout Setup Grid Row */
         .action-dispatch-btn {
             background-color: #27ae60;
             color: #ffffff;
@@ -104,6 +112,9 @@
             margin: 10px auto;
             display: block;
             cursor: pointer;
+        }
+        .action-dispatch-btn:active {
+            background-color: #219653;
         }
     </style>
 </head>
@@ -140,7 +151,12 @@
         const gridBox = document.getElementById('bingo-board-grid');
         const trackingLabel = document.getElementById('selection-tracker-label');
 
-        // Render the 100 tiles dynamically inside our grid target
+        // Parse query parameter to display dynamic wallet balance value automatically
+        const urlParams = new URLSearchParams(window.location.search);
+        const userBalanceParam = urlParams.get('balance') || '0';
+        document.getElementById('val-main').innerText = `${userBalanceParam} ብር`;
+
+        // Generate the 1-100 grid tiles layout programmatically
         for (let idx = 1; idx <= 100; idx++) {
             const blockTile = document.createElement('div');
             blockTile.className = 'tile-button';
