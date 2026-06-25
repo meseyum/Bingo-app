@@ -1,56 +1,107 @@
-    <div class="grid-container" id="bingo-grid"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bingo App</title>
+    <!-- Telegram Web App Script Link -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f9; padding: 10px; }
+        .bingo-header { display: grid; grid-template-columns: repeat(5, 1fr); font-weight: bold; font-size: 24px; color: #ff5722; margin-bottom: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 350px; margin: 0 auto; }
+        .tile { background: white; border: 2px solid #ccc; border-radius: 8px; padding: 15px 0; font-size: 18px; font-weight: bold; cursor: pointer; user-select: none; }
+        .tile.selected { background: #ff5722; color: white; border-color: #e040fb; }
+        .tile.free { background: #4caf50; color: white; }
+        #status { margin: 15px; font-size: 16px; font-weight: bold; color: #333; }
+        button { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; max-width: 350px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>🎰 Telegram Bingo 🎰</h2>
+    <div id="status">Tap tiles to match the called numbers!</div>
+
+    <!-- Bingo Column Headers -->
+    <div class="bingo-header" style="max-width: 350px; margin: 0 auto;">
+        <div>B</div><div>I</div><div>N</div><div>G</div><div>O</div>
+    </div>
+
+    <!-- The 5x5 Grid Grid -->
+    <div class="grid" id="bingo-grid"></div>
+    <br>
     
-    <div class="status-box" id="status-display">የመረጡት ካርታዎች: ምንም አልተመረጠም</div>
-    
-    <div class="confirm-btn" onclick="sendNumbersAndClose()">የመረጡትን ያረጋግጡ (Confirm Selection)</div>
+    <button id="submit-btn">Check My Card (Claim Win)</button>
 
     <script>
-        // Connect our page directly to the Telegram application layer
         const tg = window.Telegram.WebApp;
-        tg.expand(); 
+        tg.expand(); // Open full screen in Telegram
 
-        let selectedCards = [];
         const gridContainer = document.getElementById('bingo-grid');
-        const statusDisplay = document.getElementById('status-display');
+        let selectedNumbers = [];
+        let cardNumbers = [];
 
-        // Dynamically build your 1 to 100 buttons
-        for (let i = 1; i <= 100; i++) {
-            const tile = document.createElement('div');
-            tile.className = 'tile';
-            tile.innerText = i;
-            
-            tile.addEventListener('click', () => {
-                if (tile.classList.contains('selected')) {
-                    tile.classList.remove('selected');
-                    selectedCards = selectedCards.filter(num => num !== i);
-                } else {
-                    tile.classList.add('selected');
-                    selectedCards.push(i);
-                }
-                
-                if (selectedCards.length > 0) {
-                    statusDisplay.innerText = `የመረጡት ካርታዎች: ${selectedCards.join(', ')}`;
-                } else {
-                    statusDisplay.innerText = "የመረጡት ካርታዎች: ምንም አልተመረጠም";
-                }
-            });
-            
-            gridContainer.appendChild(tile);
-        }
-
-        // THIS IS THE EXACT CODE THAT CLOSES THE PAGE AND GOES BACK
-        function sendNumbersAndClose() {
-            if (selectedCards.length === 0) {
-                alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-                return;
+        // Helper to generate unique random numbers for a specific range
+        function generateColumnNumbers(min, max) {
+            let nums = [];
+            while(nums.length < 5) {
+                let r = Math.floor(Math.random() * (max - min + 1)) + min;
+                if(!nums.includes(r)) nums.push(r);
             }
-
-            // Package the data up 
-            const dataPayload = JSON.stringify({ selected_cards: selectedCards });
-
-            // CRITICAL: Send it to the bot and close the Web App layer instantly!
-            tg.sendData(dataPayload);
+            return nums;
         }
+
+        // Generate standard Bingo numbers layout
+        const colB = generateColumnNumbers(1, 15);
+        const colI = generateColumnNumbers(16, 30);
+        const colN = generateColumnNumbers(31, 45);
+        const colG = generateColumnNumbers(46, 60);
+        const colO = generateColumnNumbers(61, 75);
+
+        // Build the grid data structure row by row
+        for (let row = 0; row < 5; row++) {
+            cardNumbers.push([colB[row], colI[row], colN[row], colG[row], colO[row]]);
+        }
+
+        // Render numbers to HTML Grid
+        for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                
+                // Central Tile is always a FREE Space in classic Bingo
+                if (r === 2 && c === 2) {
+                    tile.innerText = "FREE";
+                    tile.classList.add('free');
+                } else {
+                    let num = cardNumbers[r][c];
+                    tile.innerText = num;
+
+                    // Handle tapping tiles
+                    tile.addEventListener('click', () => {
+                        if (tile.classList.contains('selected')) {
+                            tile.classList.remove('selected');
+                            selectedNumbers = selectedNumbers.filter(n => n !== num);
+                        } else {
+                            tile.classList.add('selected');
+                            selectedNumbers.push(num);
+                        }
+                    });
+                }
+                gridContainer.appendChild(tile);
+            }
+        }
+
+        // Submit selections back to Python Bot
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const dataPayload = JSON.stringify({
+                action: "verify_bingo",
+                selected: selectedNumbers,
+                card: cardNumbers
+            });
+            tg.sendData(dataPayload);
+            tg.close();
+        });
     </script>
 </body>
 </html>
