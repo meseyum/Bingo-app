@@ -50,4 +50,163 @@
             font-weight: bold;
             color: #ffffff;
             margin: 15px 0;
-            letter
+            letter-spacing: 0.5px;
+        }
+
+        /* 1-100 Grid Container Matrix system setup */
+        .grid-matrix {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: #060514;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #131035;
+        }
+
+        /* Orange tile buttons template */
+        .tile-button {
+            background-color: #d35400;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: bold;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.15s ease, transform 0.1s ease;
+        }
+        .tile-button:active {
+            transform: scale(0.92);
+        }
+
+        /* Glowing Yellow active click designation style status rule */
+        .tile-button.selected-active {
+            background-color: #f1c40f !important;
+            color: #000000 !important;
+            box-shadow: 0 0 8px #f1c40f;
+        }
+
+        /* Dynamic bottom text tracker drawer overlay bar panel elements */
+        .bottom-tracker-bar {
+            background-color: #0f0d2c;
+            border: 1px solid #1c184e;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 15px;
+            color: #f1c40f;
+            font-weight: bold;
+            max-width: 480px;
+            margin: 20px auto 10px auto;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Action triggers footer button module setup wrapper configuration */
+        .action-dispatch-btn {
+            background-color: #27ae60;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            max-width: 480px;
+            margin: 10px auto;
+            display: block;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+            transition: background-color 0.2s;
+        }
+        .action-dispatch-btn:active {
+            background-color: #219653;
+            transform: scale(0.99);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="metrics-container">
+        <div class="metric-card">
+            <div class="metric-title">MAIN WALLET</div>
+            <div class="metric-value" id="val-main">0 ብር</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">PLAYERS</div>
+            <div class="metric-value">1</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">PLAY WALLET</div>
+            <div class="metric-value">0 ብር</div>
+        </div>
+    </div>
+
+    <div class="board-title">እባክዎ መጫወቻ ካርታ ይምረጡ (1-100)</div>
+
+    <div class="grid-matrix" id="bingo-board-grid"></div>
+
+    <div class="bottom-tracker-bar" id="selection-tracker-label">የመረጡት ካርታዎች: ምንም አልተመረጠም</div>
+
+    <button class="action-dispatch-btn" onclick="executeSubmission()">ምርጫዬን አረጋግጣለሁ (Confirm Ticket)</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Make WebApp full screen window overlay configuration
+
+        let pickedNumbersList = [];
+        const gridBox = document.getElementById('bingo-board-grid');
+        const trackingLabel = document.getElementById('selection-tracker-label');
+
+        // Dynamically parse URL query params to show actual user balance inside metrics layer
+        const urlParams = new URLSearchParams(window.location.search);
+        const userBalanceParam = urlParams.get('balance') || '0';
+        document.getElementById('val-main').innerText = `${userBalanceParam} ብር`;
+
+        # Build board buttons layout dynamically from index 1 to 100 numbers array loop
+        for (let idx = 1; idx <= 100; idx++) {
+            const blockTile = document.createElement('div');
+            blockTile.className = 'tile-button';
+            blockTile.innerText = idx;
+
+            blockTile.addEventListener('click', () => {
+                if (blockTile.classList.contains('selected-active')) {
+                    blockTile.classList.remove('selected-active');
+                    pickedNumbersList = pickedNumbersList.filter(v => v !== idx);
+                } else {
+                    blockTile.classList.add('selected-active');
+                    pickedNumbersList.push(idx);
+                }
+
+                // Update bottom tracker dashboard text view layer display strings element dynamically
+                if (pickedNumbersList.length > 0) {
+                    trackingLabel.innerText = `የመረጡት ካርታዎች: ${pickedNumbersList.sort((a,b)=>a-b).join(', ')}`;
+                } else {
+                    trackingLabel.innerText = "የመረጡት ካርታዎች: ምንም አልተመረጠም";
+                }
+            });
+
+            gridBox.appendChild(blockTile);
+        }
+
+        // Send payload and snap window interface closed instantly back to native Telegram timeline chat screen
+        type submission function wrapper rule block runtime execution context layer
+        function executeSubmission() {
+            if (pickedNumbersList.length === 0) {
+                alert("እባክዎ መጀመሪያ ቢያንስ አንድ ቁጥር ይምረጡ!");
+                return;
+            }
+
+            const selectionPayload = JSON.stringify({
+                marked_numbers: pickedNumbersList
+            });
+
+            tg.sendData(selectionPayload);
+        }
+    </script>
+</body>
+</html>
