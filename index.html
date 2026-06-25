@@ -69,9 +69,6 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
         }
-        .number-btn:active {
-            transform: scale(0.9);
-        }
         .number-btn.selected {
             background-color: #ffcc00;
             color: #000000;
@@ -98,10 +95,6 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: background 0.2s;
-        }
-        .confirm-btn:hover {
-            background-color: #2ecc71;
         }
     </style>
 </head>
@@ -123,7 +116,6 @@
     </div>
 
     <div class="instruction">እባክዎ መጫወቻ ካርታ ይምረጡ (1-100)</div>
-
     <div class="grid-container" id="bingo-grid"></div>
 
     <div class="status-box">
@@ -133,11 +125,9 @@
     <button class="confirm-btn" onclick="confirmTicket()">ምርጫዬን አረጋግጣለሁ (Confirm Ticket)</button>
 
     <script>
-        // የቴሌግራም ዌብ አፕን ማስነሳት
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ዌብ አፑን ሙሉ ስክሪን ማድረግ
+        tg.expand();
 
-        // ከቦቱ የተላከውን የቀሪ ሒሳብ ዳታ ማንበብ
         const urlParams = new URLSearchParams(window.location.search);
         const currentBalance = urlParams.get('balance') || "100";
         document.getElementById('main-balance').innerText = currentBalance + " ብር";
@@ -145,7 +135,6 @@
         let marked_numbers = [];
         const grid = document.getElementById('bingo-grid');
 
-        // ከ1 እስከ 100 ያሉትን ቁጥሮች በሰሌዳው ላይ መፍጠር
         for (let i = 1; i <= 100; i++) {
             const btn = document.createElement('button');
             btn.className = 'number-btn';
@@ -154,7 +143,6 @@
             grid.appendChild(btn);
         }
 
-        // ቁጥር ሲመረጥ ወይም ሲሰረዝ የሚሰራ ፈንክሽን
         function toggleNumber(num, btn) {
             if (marked_numbers.includes(num)) {
                 marked_numbers = marked_numbers.filter(n => n !== num);
@@ -164,7 +152,6 @@
                 btn.classList.add('selected');
             }
             
-            // የተመረጡትን ቁጥሮች በቅደም ተከተል ማሳየት
             if (marked_numbers.length > 0) {
                 document.getElementById('selected-list').innerText = marked_numbers.sort((a,b) => a-b).join(', ');
             } else {
@@ -172,23 +159,16 @@
             }
         }
 
-        // 🔴 ምርጫን አረጋግጦ ወደ ቴሌግራም ቦት መረጃ መላኪያ ዋናው ፈንክሽን
+        // 🔴 ይህ ፈንክሽን ነው መረጃውን ወደ ቴሌግራም የሚልከው
         function confirmTicket() {
             if (marked_numbers.length === 0) {
-                alert("እባክዎ መጀመሪያ ቢያንስ አንድ ቁጥር ይምረጡ!");
+                alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
                 return;
             }
-
-            // የመረጧቸውን ቁጥሮች በ JSON ፎርማት ወደ ቴሌግራም ቦቱ መላክ
-            let webAppData = {
-                "marked_numbers": marked_numbers
-            };
-
-            // ዳታውን ልኮ ዌብ አፑን ይዘጋዋል
+            let webAppData = { "marked_numbers": marked_numbers };
             tg.sendData(JSON.stringify(webAppData));
             tg.close();
         }
     </script>
-
 </body>
 </html>
