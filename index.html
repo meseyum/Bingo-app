@@ -2,237 +2,193 @@
 <html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
-    <title>Super Bingo Dashboard</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {<audio id="win-sound" src="win.mp3" preload="auto"></audio>
-<audio id="click-sound" src="click.mp3" preload="auto"></audio>
-            background-color: #0b0920; 
-            color: #ffffff;
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 12px;
-            text-align: center;function executeSubmission() {
-    // ቁልፉ ሲነካ የክሊክ ድምፅ ያጫውታል
-    document.getElementById('click-sound').play(); 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperBingo2026</title>
     
-    if (pickedNumbersList.length === 0) {
-        alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-        return;
-    }
-    tg.sendData(JSON.stringify({ marked_numbers: pickedNumbersList }));
-}
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0e14;
+            color: #ffffff;
+            margin: 0;
+            padding: 15px;
+            text-align: center;
+            -webkit-user-select: none;
+            user-select: none;
         }
-
-        /* Dashboard Metrics Cards Row (Ref: Image 1000006680.jpg) */
-        .metrics-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+        .header-container {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 20px;
+            gap: 10px;
         }
-        .metric-card {
-            background-color: #16133a;
-            border: 1px solid #231f5c;
+        .wallet-box {
+            background-color: #1a1f2c;
             border-radius: 8px;
-            padding: 10px 4px;
+            padding: 10px;
+            flex: 1;
+            border: 1px solid #2d3548;
         }
-        .metric-title {
-            font-size: 10px;
-            color: #7d79b0;
-            font-weight: bold;
-            margin-bottom: 4px;
+        .wallet-title {
+            font-size: 11px;
+            color: #8fa0c4;
+            text-transform: uppercase;
+            margin-bottom: 5px;
         }
-        .metric-value {
-            font-size: 14px;
+        .wallet-value {
+            font-size: 16px;
             font-weight: bold;
             color: #ffcc00;
         }
-
-        .board-title {
+        .instruction {
             font-size: 18px;
             font-weight: bold;
-            margin: 15px 0;
+            margin-bottom: 15px;
+            color: #ffffff;
         }
-
-        /* 1-100 Grid System Layout Matrix Container */
-        .grid-matrix {
+        .grid-container {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             gap: 6px;
-            max-width: 450px;
-            margin: 0 auto;
-            background-color: #060514;
+            background-color: #07090e;
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid #131035;
+            border: 2px solid #1a1f2c;
+            margin-bottom: 20px;
         }
-
-        /* Standard Orange Grid Tiles */
-        .tile-button {
+        .number-btn {
             background-color: #d35400;
-            color: #ffffff;
-            font-size: 13px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 14px;
             font-weight: bold;
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
             cursor: pointer;
-            user-select: none;
-            transition: background-color 0.1s, transform 0.1s;
+            transition: background 0.2s, transform 0.1s;
         }
-        .tile-button:active {
+        .number-btn:active {
             transform: scale(0.9);
         }
-
-        /* Selected Active Bright Yellow Grid Tile Layout */
-        .tile-button.selected-active {
-            background-color: #f1c40f !important;
-            color: #000000 !important;
-            box-shadow: 0 0 5px #f1c40f;
+        .number-btn.selected {
+            background-color: #ffcc00;
+            color: #000000;
+            box-shadow: 0 0 10px #ffcc00;
         }
-
-        /* Selection Status Tracker Panel Label Box */
-        .bottom-tracker-bar {
-            background-color: #0f0d2c;
-            border: 1px solid #1c184e;
+        .status-box {
+            background-color: #10141d;
             border-radius: 8px;
-            padding: 14px;
-            font-size: 15px;
-            color: #f1c40f;
-            font-weight: bold;
-            max-width: 430px;
-            margin: 20px auto 10px auto;
-        }
-
-        /* Main Confirm Button Layout Setup Grid Row */
-        .action-dispatch-btn {// 🔴 ዋናው ክፍል፦ ቁጥሮቹን በ JSON ፎርማት ወደ ቴሌግራም ቦት መላኪያ
-    if (window.Telegram && function confirmTicket() {
-    // የመረጧቸው ቁጥሮች ዝርዝር (ለምሳሌ [23])
-    let selectedNumbers = marked_numbers; 
-
-    if (selectedNumbers.length === 0) {
-        alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-        return;
-    }
-
-    // 🔴 ዳታውን ወደ ቴሌግራም ቦት ማስተላለፊያ ዋና ኮድ
-    if (window.Telegram && window.Telegram.WebApp) {
-        let webAppData = {
-            "marked_numbers": selectedNumbers
-        };
-        
-        // ዳታውን ወደ ቦቱ ልኮ ዌብ አፑን ይዘጋዋል
-        window.Telegram.WebApp.sendData(JSON.stringify(webAppData));
-        window.Telegram.WebApp.close();
-    } else {
-        alert("እባክዎ ጨዋታውን በቴሌግራም ቦት ውስጥ ይክፈቱት!");
-    }
-}
-.Telegram.WebApp) {
-        let webAppData = {
-            "marked_numbers": selectedNumbers
-        };
-        
-        // ዳታውን ወደ ቦቱ ይልካል፣ ዌብ አፑንም ይዘጋል
-        window.Telegram.WebApp.sendData(JSON.stringify(webAppData));
-        window.Telegram.WebApp.close();
-    } else {
-        alert("እባክዎ ጨዋታውን በቴሌግራም ቦት ውስጥ ይክፈቱት!");
-    }
-}
-;
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: bold;
             padding: 15px;
-            border-radius: 8px;
-            border: none;
-            width: 100%;
-            max-width: 450px;
-            margin: 10px auto;
-            display: block;
-            cursor: pointer;
+            margin-bottom: 15px;
+            border: 1px solid #1a1f2c;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffcc00;
         }
-        .action-dispatch-btn:active {
-            background-color: #219653;
+        .confirm-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            padding: 15px 0;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background 0.2s;
+        }
+        .confirm-btn:hover {
+            background-color: #2ecc71;
         }
     </style>
 </head>
 <body>
 
-    <div class="metrics-container">
-        <div class="metric-card">
-            <div class="metric-title">MAIN WALLET</div>
-            <div class="metric-value" id="val-main">0 ብር</div>
+    <div class="header-container">
+        <div class="wallet-box">
+            <div class="wallet-title">MAIN WALLET</div>
+            <div class="wallet-value" id="main-balance">100 ብር</div>
         </div>
-        <div class="metric-card">
-            <div class="metric-title">PLAYERS</div>
-            <div class="metric-value">1</div>
+        <div class="wallet-box">
+            <div class="wallet-title">PLAYERS</div>
+            <div class="wallet-value">1</div>
         </div>
-        <div class="metric-card">
-            <div class="metric-title">PLAY WALLET</div>
-            <div class="metric-value">0 ብር</div>
+        <div class="wallet-box">
+            <div class="wallet-title">PLAY WALLET</div>
+            <div class="wallet-value">0 ብር</div>
         </div>
     </div>
 
-    <div class="board-title">እባክዎ መጫወቻ ካርታ ይምረጡ (1-100)</div>
+    <div class="instruction">እባክዎ መጫወቻ ካርታ ይምረጡ (1-100)</div>
 
-    <div class="grid-matrix" id="bingo-board-grid"></div>
+    <div class="grid-container" id="bingo-grid"></div>
 
-    <div class="bottom-tracker-bar" id="selection-tracker-label">የመረጡት ካርታዎች: ምንም አልተመረጠም</div>
+    <div class="status-box">
+        የመረጡት ካርታዎች: <span id="selected-list">ምንም አልተመረጠም</span>
+    </div>
 
-    <button class="action-dispatch-btn" onclick="executeSubmission()">ምርጫዬን አረጋግጣለሁ (Confirm Ticket)</button>
+    <button class="confirm-btn" onclick="confirmTicket()">ምርጫዬን አረጋግጣለሁ (Confirm Ticket)</button>
 
     <script>
+        // የቴሌግራም ዌብ አፕን ማስነሳት
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // ዌብ አፑን ሙሉ ስክሪን ማድረግ
 
-        let pickedNumbersList = [];
-        const gridBox = document.getElementById('bingo-board-grid');
-        const trackingLabel = document.getElementById('selection-tracker-label');
-
-        // Parse query parameter to display dynamic wallet balance value automatically
+        // ከቦቱ የተላከውን የቀሪ ሒሳብ ዳታ ማንበብ
         const urlParams = new URLSearchParams(window.location.search);
-        const userBalanceParam = urlParams.get('balance') || '0';
-        document.getElementById('val-main').innerText = `${userBalanceParam} ብር`;
+        const currentBalance = urlParams.get('balance') || "100";
+        document.getElementById('main-balance').innerText = currentBalance + " ብር";
 
-        // Generate the 1-100 grid tiles layout programmatically
-        for (let idx = 1; idx <= 100; idx++) {
-            const blockTile = document.createElement('div');
-            blockTile.className = 'tile-button';
-            blockTile.innerText = idx;
+        let marked_numbers = [];
+        const grid = document.getElementById('bingo-grid');
 
-            blockTile.addEventListener('click', () => {
-                if (blockTile.classList.contains('selected-active')) {
-                    blockTile.classList.remove('selected-active');
-                    pickedNumbersList = pickedNumbersList.filter(v => v !== idx);
-                } else {
-                    blockTile.classList.add('selected-active');
-                    pickedNumbersList.push(idx);
-                }
-
-                if (pickedNumbersList.length > 0) {
-                    trackingLabel.innerText = `የመረጡት ካርታዎች: ${pickedNumbersList.sort((a,b)=>a-b).join(', ')}`;
-                } else {
-                    trackingLabel.innerText = "የመረጡት ካርታዎች: ምንም አልተመረጠም";
-                }
-            });
-
-            gridBox.appendChild(blockTile);
+        // ከ1 እስከ 100 ያሉትን ቁጥሮች በሰሌዳው ላይ መፍጠር
+        for (let i = 1; i <= 100; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'number-btn';
+            btn.innerText = i;
+            btn.onclick = () => toggleNumber(i, btn);
+            grid.appendChild(btn);
         }
 
-        function executeSubmission() {
-            if (pickedNumbersList.length === 0) {
-                alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
+        // ቁጥር ሲመረጥ ወይም ሲሰረዝ የሚሰራ ፈንክሽን
+        function toggleNumber(num, btn) {
+            if (marked_numbers.includes(num)) {
+                marked_numbers = marked_numbers.filter(n => n !== num);
+                btn.classList.remove('selected');
+            } else {
+                marked_numbers.push(num);
+                btn.classList.add('selected');
+            }
+            
+            // የተመረጡትን ቁጥሮች በቅደም ተከተል ማሳየት
+            if (marked_numbers.length > 0) {
+                document.getElementById('selected-list').innerText = marked_numbers.sort((a,b) => a-b).join(', ');
+            } else {
+                document.getElementById('selected-list').innerText = "ምንም አልተመረጠም";
+            }
+        }
+
+        // 🔴 ምርጫን አረጋግጦ ወደ ቴሌግራም ቦት መረጃ መላኪያ ዋናው ፈንክሽን
+        function confirmTicket() {
+            if (marked_numbers.length === 0) {
+                alert("እባክዎ መጀመሪያ ቢያንስ አንድ ቁጥር ይምረጡ!");
                 return;
             }
-            tg.sendData(JSON.stringify({ marked_numbers: pickedNumbersList }));
+
+            // የመረጧቸውን ቁጥሮች በ JSON ፎርማት ወደ ቴሌግራም ቦቱ መላክ
+            let webAppData = {
+                "marked_numbers": marked_numbers
+            };
+
+            // ዳታውን ልኮ ዌብ አፑን ይዘጋዋል
+            tg.sendData(JSON.stringify(webAppData));
+            tg.close();
         }
     </script>
+
 </body>
 </html>
