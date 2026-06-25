@@ -110,9 +110,9 @@
         }
 
         /* Main Confirm Button Layout Setup Grid Row */
-        .action-dispatch-btn {
-            background-color: #function confirmTicket() {
-    // ተጠቃሚው የመረጣቸውን ቁጥሮች ዝርዝር ይይዛል
+        .action-dispatch-btn {// 🔴 ዋናው ክፍል፦ ቁጥሮቹን በ JSON ፎርማት ወደ ቴሌግራም ቦት መላኪያ
+    if (window.Telegram && function confirmTicket() {
+    // የመረጧቸው ቁጥሮች ዝርዝር (ለምሳሌ [23])
     let selectedNumbers = marked_numbers; 
 
     if (selectedNumbers.length === 0) {
@@ -120,8 +120,20 @@
         return;
     }
 
-    // 🔴 ዋናው ክፍል፦ ቁጥሮቹን በ JSON ፎርማት ወደ ቴሌግራም ቦት መላኪያ
+    // 🔴 ዳታውን ወደ ቴሌግራም ቦት ማስተላለፊያ ዋና ኮድ
     if (window.Telegram && window.Telegram.WebApp) {
+        let webAppData = {
+            "marked_numbers": selectedNumbers
+        };
+        
+        // ዳታውን ወደ ቦቱ ልኮ ዌብ አፑን ይዘጋዋል
+        window.Telegram.WebApp.sendData(JSON.stringify(webAppData));
+        window.Telegram.WebApp.close();
+    } else {
+        alert("እባክዎ ጨዋታውን በቴሌግራም ቦት ውስጥ ይክፈቱት!");
+    }
+}
+.Telegram.WebApp) {
         let webAppData = {
             "marked_numbers": selectedNumbers
         };
