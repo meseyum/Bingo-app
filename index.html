@@ -12,7 +12,7 @@
         /* የላይኛው የባነር ክፍል */
         .header-banner { background-color: #e74c3c; color: white; padding: 12px; font-weight: bold; border-radius: 8px; margin-bottom: 15px; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        /* የዋሌት መረጃዎች ማሳያ (ልክ በፎቶው ላይ እንዳለው) */
+        /* የዋሌት መረጃዎች ማሳያ */
         .info-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .info-box { background-color: #1a164d; border: 1px solid #2a2475; padding: 10px 5px; border-radius: 8px; font-size: 11px; }
         .info-box .title { color: #8b87bd; font-size: 10px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -71,7 +71,7 @@
         // የቴሌግራም ዌብ አፕን ማስጀመር
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // ሙሉ ስክሪን እንዲሆን ማድረግ
+        tg.expand();
 
         // ከቦቱ የመጣውን ባላንስ ማንበቢያ
         const urlParams = new URLSearchParams(window.location.search);
@@ -90,57 +90,30 @@
             btn.onclick = () => {
                 const index = selectedNumbers.indexOf(i);
                 if (index > -1) {
-                    // ከተመረጠ መልሰህ አውጣው (ከለሩን አጥፋው)
                     selectedNumbers.splice(index, 1);
                     btn.classList.remove('selected');
                 } else {
-                    // ቢበዛ 10 ቁጥር ብቻ እንዲመርጡ መገደብ
                     if (selectedNumbers.length >= 10) {
                         alert("በአንድ ዙር ከ 10 ቁጥር በላይ መምረጥ አይቻልም!");
                         return;
                     }
                     selectedNumbers.push(i);
-                    btn.classList.add('selected'); // ሲመረጥ ቢጫ ማድረግ
+                    btn.classList.add('selected');
                 }
             };
             board.appendChild(btn);
         }
 
-        // 🚀 "ምርጫዬን አረጋግጣለሁ" ሲነካ የሚሰራው አስተማማኝ የቴሌግራም API መላኪያ
+        // 🚀 "ምርጫዬን አረጋግጣለሁ" ሲነካ የሚሰራው አስተማማኝ የቴሌግራም ኦፊሴላዊ መላኪያ
         document.getElementById('confirm-selection').onclick = function() {
             if (selectedNumbers.length === 0) {
                 alert("እባክዎ መጀመሪያ ቢያንስ 1 ቁጥር ይምረጡ!");
                 return;
             }
 
-            // የእርስዎ ቦት ቶከን
-            const botToken = "8836060939:AAFoUFgghWNxK-Hmrc9Q5jo4aPsSvxd4nIM";
-            const userId = tg.initDataUnsafe?.user?.id;
-
-            if (!userId) {
-                alert("የቴሌግራም ID ማግኘት አልተቻለም! እባክዎ ከቦቱ ውስጥ ይክፈቱት።");
-                return;
-            }
-
-            // ዳታውን በ HTTPS ሪኩዌስት በቀጥታ ለቦቱ መላክ (ይህ ሲሆን ጨዋታው በጭራሽ አይዘጋም)
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: userId,
-                    text: `🎰 BINGO_DATA:${JSON.stringify({ marked_numbers: selectedNumbers })}`
-                })
-            })
-            .then(res => {
-                if (res.ok) {
-                    tg.close(); // መረጃው በተሳካ ሁኔታ ሲላክ ዌብ አፑን ይዘጋዋል
-                } else {
-                    alert("የመረጡትን መላክ አልተቻለም፣ እባክዎ እንደገና ይሞክሩ።");
-                }
-            })
-            .catch(err => {
-                alert("የኔትወርክ ስህተት ተፈጥሯል: " + err);
-            });
+            // መረጃውን ወደ ቴሌግራም ቦት የሚልከው ፍፁም ትክክለኛ መስመር
+            const gameData = { marked_numbers: selectedNumbers };
+            window.Telegram.WebApp.sendData(JSON.stringify(gameData));
         };
     </script>
 </body>
