@@ -8,28 +8,16 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #0b092b; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 15px; }
-        
-        /* የላይኛው የባነር ክፍል */
         .header-banner { background-color: #e74c3c; color: white; padding: 12px; font-weight: bold; border-radius: 8px; margin-bottom: 15px; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        
-        /* የዋሌት መረጃዎች ማሳያ */
         .info-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .info-box { background-color: #1a164d; border: 1px solid #2a2475; padding: 10px 5px; border-radius: 8px; font-size: 11px; }
         .info-box .title { color: #8b87bd; font-size: 10px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .info-box .value { color: #f1c40f; font-weight: bold; font-size: 13px; }
-
-        /* ዋናው የቁጥሮች መምረጫ ሰሌዳ */
         .board-title { color: #f1c40f; font-weight: bold; margin-bottom: 15px; font-size: 16px; }
         .bingo-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background-color: #07051c; padding: 12px; border-radius: 12px; border: 2px solid #1a164d; box-shadow: inset 0 0 15px rgba(0,0,0,0.6); }
-        
-        /* የቁልፎቹ መደበኛ ቀለም (ብርቱካናማ) */
         .num-btn { background: #d35400; color: white; border: none; padding: 12px 0; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
-        
-        /* ቁጥሩ ሲመረጥ የሚሆንበት ቀለም (ቢጫ ከለር) */
         .num-btn.selected { background: #f1c40f !important; color: #000000 !important; box-shadow: 0 0 10px #f1c40f; }
-        
-        /* የታችኛው አረጋግጫለሁ ቁልፍ */
-        .action-container { margin-top: 25px; padding: 0 10px; }
+        .action-container { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; padding: 0 10px; }
         .confirm-btn { width: 100%; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); }
         .confirm-btn:active { transform: scale(0.98); }
     </style>
@@ -60,7 +48,6 @@
     </div>
 
     <div class="board-title">እባክዎ መጫወቻ ካርታ ይምረጡ (1-100) 👇</div>
-
     <div class="bingo-grid" id="bingo-board"></div>
 
     <div class="action-container">
@@ -68,12 +55,10 @@
     </div>
 
     <script>
-        // የቴሌግራም ዌብ አፕን ማስጀመር
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // ከቦቱ የመጣውን ባላንስ ማንበቢያ
         const urlParams = new URLSearchParams(window.location.search);
         const currentBal = urlParams.get('balance') || '100';
         document.getElementById('main-balance').innerText = currentBal + " ብር";
@@ -81,7 +66,6 @@
         let selectedNumbers = [];
         const board = document.getElementById('bingo-board');
 
-        // 1-100 ቁጥሮችን በቦርዱ ላይ መፍጠር
         for (let i = 1; i <= 100; i++) {
             const btn = document.createElement('button');
             btn.className = 'num-btn';
@@ -104,14 +88,11 @@
             board.appendChild(btn);
         }
 
-        // 🚀 "ምርጫዬን አረጋግጣለሁ" ሲነካ የሚሰራው አስተማማኝ የቴሌግራም ኦፊሴላዊ መላኪያ
         document.getElementById('confirm-selection').onclick = function() {
             if (selectedNumbers.length === 0) {
                 alert("እባክዎ መጀመሪያ ቢያንስ 1 ቁጥር ይምረጡ!");
                 return;
             }
-
-            // መረጃውን ወደ ቴሌግራም ቦት የሚልከው ፍፁም ትክክለኛ መስመር
             const gameData = { marked_numbers: selectedNumbers };
             window.Telegram.WebApp.sendData(JSON.stringify(gameData));
         };
