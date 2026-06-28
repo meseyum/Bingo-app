@@ -202,6 +202,7 @@
 </head>
 <body>
 
+    <!-- 1. የላይኛው አራት ሳጥኖች -->
     <div class="status-container">
         <div class="status-box">
             <div class="status-title">WALLET</div>
@@ -221,10 +222,12 @@
         </div>
     </div>
 
+    <!-- 2. የቀይ ድምፅ ማስታወቂያ ባር -->
     <div class="audio-bar">
         📢 የአማርኛ ድምፅ ለመስማት ይጫኑ!
     </div>
 
+    <!-- 3. የመካከለኛው ክፍል -->
     <div class="main-game-area">
         <div class="bingo-board">
             <div class="bingo-header-row">
@@ -234,19 +237,19 @@
                 <div class="bingo-letter g-letter">G</div>
                 <div class="bingo-letter o-letter">O</div>
             </div>
-            <div class="bingo-numbers-grid" id="bingo-matrix">
-                </div>
+            <div class="bingo-numbers-grid" id="bingo-matrix"></div>
         </div>
 
         <div class="side-controls">
             <div class="section-label">ካርታ ይምረጡ 👇</div>
             <div class="auto-status-box">
-                <button class="auto-indicator-btn" id="auto-btn">🤖 AUTO</button>
+                <button class="auto-indicator-btn" id="auto-btn">🤖 AUTO: ON</button>
             </div>
             <div class="called-count" id="called-counter">የተጠራ: 0</div>
         </div>
     </div>
 
+    <!-- 4. የታችኛው የ 1-100 ቁጥሮች መምረጫ ሰሌዳ -->
     <div class="selection-title">🎫 የካርድ ቁጥር ይምረጡ (1-100)</div>
     <div class="numbers-board-100" id="selection-board-100"></div>
 
@@ -262,36 +265,54 @@
         const confirmBtn = document.getElementById('confirm-selection-btn');
         const autoBtn = document.getElementById('auto-btn');
 
-        let mySelectedNumbers = [];
-        let isAutoModeOn = false;
+        // 🌟 ሒሳቡን 5000 ብር እንዲያሳይ እና ከቦቱ የሚመጣውን ዳታ በራስ-ሰር እንዲቀበል የሚያደርገው አዲሱ ኮድ 🌟
+        const urlParams = new URLSearchParams(window.location.search);
+        const userBalance = urlParams.get('balance') || "5000"; // ከቦቱ ዳታ ካልመጣ 5000 ብር በዲፎልት ያሳያል
+        const totalPlayers = urlParams.get('players') || "0";
+        const ferashPool = urlParams.get('ferash') || "0";
+        const roundStatus = urlParams.get('status') || "በቂ ተጫዋች እየተጠባበቀ ነው...";
 
-        // 🤖 የቢንጎ ማትሪክስ መፍጠሪያ (ለአብነት ያህል የመጀመሪያዎቹን 35 ቁጥሮች እናስገባ)
+        // በስክሪኑ ላይ መረጃዎቹን መተካት
+        document.getElementById('wallet-bal').innerText = userBalance + " ብር";
+        document.getElementById('player-count').innerText = totalPlayers;
+        document.getElementById('ferash-bal').innerText = ferashPool + " ብር";
+        document.getElementById('round-status').innerText = roundStatus;
+
+        let mySelectedNumbers = [];
+        let isAutoModeOn = true; // በዲፎልት AUTO: ON እንዲሆን
+
+        // በመጀመሪያ ገጹ ሲከፈት አረንጓዴው ቁልፍ እንዲደበቅ (ምክንያቱም AUTO: ON ስለሆነ)
+        confirmBtn.style.display = 'none';
+
+        // የቢንጎ ማትሪክስ መፍጠሪያ
         for (let i = 1; i <= 35; i++) {
             const cell = document.createElement('div');
             cell.className = 'bingo-cell';
             cell.innerText = i;
-            // ለአብነት ያህል የተወሰኑትን "Called" (የተጠሩ) እናድርጋቸው
             if (i === 5 || i === 16 || i === 32) {
                 cell.classList.add('called');
             }
             bingoMatrix.appendChild(cell);
         }
 
-        // 🎫 የታችኛው የ 1-100 መጫወቻ ቁልፎች መፍጠሪያ
+        // የ 1-100 ቁጥሮች መጫኛዎች
         for (let i = 1; i <= 100; i++) {
             const btn = document.createElement('button');
             btn.className = 'num-selection-btn';
             btn.innerText = i;
 
             btn.onclick = () => {
-                if (isAutoModeOn) return;
+                if (isAutoModeOn) {
+                    alert("እባክዎ መጀመሪያ AUTOን ያጥፉት!");
+                    return;
+                }
 
                 const idx = mySelectedNumbers.indexOf(i);
                 if (idx > -1) {
                     mySelectedNumbers.splice(idx, 1);
                     btn.classList.remove('active');
                 } else {
-                    if (mySelectedNumbers.length >= 10) return; // ገደብ
+                    if (mySelectedNumbers.length >= 10) return;
                     mySelectedNumbers.push(i);
                     btn.classList.add('active');
                 }
@@ -299,21 +320,20 @@
             selectionBoard.appendChild(btn);
         }
 
-        // 🤖 AUTO ማብሪያና ማጥፊያ ህግ
+        // AUTO አዝራር አሰራር
         autoBtn.onclick = () => {
             isAutoModeOn = !isAutoModeOn;
             if (isAutoModeOn) {
                 autoBtn.style.backgroundColor = '#27ae60';
                 autoBtn.innerText = "🤖 AUTO: ON";
-                confirmBtn.style.display = 'none'; // አውቶማቲክ ሲሆን ቁልፉ ይጥፋ
+                confirmBtn.style.display = 'none';
             } else {
-                autoBtn.style.backgroundColor = '#7f8c8d';
+                autoBtn.style.backgroundColor = '#dc3545';
                 autoBtn.innerText = "🤖 AUTO: OFF";
-                confirmBtn.style.display = 'block'; // ሲጠፋ መልሶ ይውጣ
+                confirmBtn.style.display = 'block';
             }
         };
 
-        // ማረጋገጫ ሲጫን ዳታ መላኪያ
         confirmBtn.onclick = () => {
             if (mySelectedNumbers.length === 0) {
                 alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
