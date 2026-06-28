@@ -2,9 +2,8 @@
 <html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Bingo 2026</title>
-    <!-- የቴሌግራም ዌብ አፕ ዋና ስክሪፕት (ከፓይተን ጋር የሚያገናኘው ይህ ነው!) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Super Bingo Dashboard 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -12,92 +11,150 @@
             background-color: #0b0e14;
             color: #ffffff;
             margin: 0;
-            padding: 10px;
+            padding: 10px 10px 90px 10px;
             text-align: center;
-            direction: ltr;
+            user-select: none;
         }
+        /* የላይኛው መረጃ ሰሌዳ */
         .header-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 5px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .stat-box {
             background: #161b26;
-            padding: 8px 2px;
+            padding: 6px 2px;
             border-radius: 6px;
             border: 1px solid #232d3f;
         }
         .stat-box span {
             display: block;
-            font-size: 10px;
+            font-size: 9px;
             color: #8a99ad;
             margin-bottom: 2px;
         }
         .stat-box strong {
-            font-size: 12px;
+            font-size: 11px;
             color: #00ffcc;
         }
-        .audio-banner {
-            background: #c0392b;
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: bold;
+
+        /* 🎰 ዋናው የ BINGO መተግበሪያ ዳሽቦርድ (ላይቭ ማሳያ) */
+        .dashboard-section {
+            background: #111622;
+            border: 2px solid #1f293d;
+            border-radius: 12px;
+            padding: 10px;
             margin-bottom: 15px;
-            cursor: pointer;
         }
+        .bingo-letters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .letter-box {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 6px 0;
+            border-radius: 6px;
+            color: white;
+        }
+        .b-bg { background: #e67e22; }
+        .i-bg { background: #2980b9; }
+        .n-bg { background: #c0392b; }
+        .g-bg { background: #27ae60; }
+        .o-bg { background: #8e44ad; }
+
+        /* የቀጥታ ዕድል ቁጥር ማሳያ ቢጫ ሳጥን */
+        .called-number-display {
+            background: #1b2234;
+            border: 2px dashed #f1c40f;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        .called-number-display span {
+            font-size: 12px;
+            color: #f1c40f;
+            display: block;
+        }
+        .called-number-display strong {
+            font-size: 32px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+
+        /* 🎫 የካርድ መምረጫ (1-100) */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 5px;
-            max-width: 100%;
-            margin: 0 auto 20px auto;
+            gap: 4px;
             background: #161b26;
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid #232d3f;
         }
         .cell {
-            background: #d35400;
-            color: white;
+            background: #2c3e50;
+            color: #bdc3c7;
             font-weight: bold;
-            font-size: 13px;
-            padding: 10px 0;
+            font-size: 12px;
+            padding: 8px 0;
             border-radius: 4px;
             cursor: pointer;
-            user-select: none;
-            transition: all 0.2s ease;
-            border: 1px solid #a04000;
+            border: 1px solid #34495e;
+            transition: all 0.1s ease;
         }
+        /* ተጫዋቹ የመረጠው ቁጥር */
         .cell.selected {
+            background: #e67e22 !important;
+            color: white !important;
+            border-color: #d35400;
+        }
+        /* ጨዋታው ሲጀምር በዕድል የወጣው ቁጥር ቦርዱ ላይ ሲበራ */
+        .cell.called {
             background: #f1c40f !important;
             color: #000000 !important;
             box-shadow: 0 0 8px #f1c40f;
-            transform: scale(1.05);
+            animation: blink 0.5s repeat(2);
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        /* ከታች ተጣብቆ የሚቀመጠው ቁልፍ */
+        .footer-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #0b0e14;
+            padding: 10px 0;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+            z-index: 9999;
         }
         .submit-btn {
             background: #2ecc71;
             color: white;
             border: none;
-            width: 100%;
-            padding: 15px 0;
-            font-size: 18px;
+            width: 90%;
+            padding: 14px 0;
+            font-size: 16px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            margin-top: 10px;
+            display: block;
+            margin: 0 auto;
         }
         .submit-btn:active {
-            transform: scale(0.98);
+            background: #27ae60;
         }
     </style>
 </head>
 <body>
 
-    <!-- የላይኛው መረጃ ሰሌዳ -->
     <div class="header-container">
         <div class="stat-box">
             <span>WALLET</span>
@@ -113,37 +170,44 @@
         </div>
         <div class="stat-box">
             <span>ROUND</span>
-            <strong id="round-status" style="font-size:9px; color:#f1c40f;">በቂ ተጫዋች...</strong>
+            <strong id="round-status" style="font-size:8px; color:#f1c40f;">በቂ ተጫዋች...</strong>
         </div>
     </div>
 
-    <!-- የድምፅ ማስታወቂያ መስመር -->
-    <div class="audio-banner">
-        📢 የአማርኛ ድምፅ ለመስማት ይጫኑ!
+    <div class="dashboard-section">
+        <div class="bingo-letters">
+            <div class="letter-box b-bg">B</div>
+            <div class="letter-box i-bg">I</div>
+            <div class="letter-box n-bg">N</div>
+            <div class="letter-box g-bg">G</div>
+            <div class="letter-box o-bg">O</div>
+        </div>
+        
+        <div class="called-number-display">
+            <span id="game-notif">ቁጥር ለመምረጥ ሳጥኖቹን ይጫኑ</span>
+            <strong id="current-ball">-</strong>
+        </div>
     </div>
 
-    <h4 style="color: #f39c12; margin: 5px 0;">🎫 የካርድ ቁጥር ይምረጡ (1-100)</h4>
-    <p style="font-size: 11px; color:#8a99ad; margin: 0 0 10px 0;">ማሳሰቢያ፦ ለአንድ ቁጥር 10 ብር ያስከፍላል።</p>
+    <h4 style="color: #f39c12; margin: 5px 0; font-size: 13px;">🎫 የጨዋታ ካርድዎን ይምረጡ (1-100)</h4>
 
-    <!-- የቢንጎ ቁጥሮች ሰሌዳ (1-100) -->
     <div class="grid-container" id="bingo-grid"></div>
 
-    <!-- 🌟 ዋናው ማረጋገጫ ቁልፍ -->
-    <button class="submit-btn" id="confirm-btn">ምርጫዬን አረጋግጣለሁ</button>
+    <div class="footer-container">
+        <button class="submit-btn" id="confirm-btn">ምርጫዬን አረጋግጣለሁ</button>
+    </div>
 
     <script>
-        // የቴሌግራም ዌብ አፕሊኬሽን ማስጀመር
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ሙሉ ስክሪን እንዲሆን
+        tg.expand();
 
-        // ከቦቱ (Python) በሊንክ የተላኩትን መረጃዎች ማንበቢያ
+        // መረጃዎችን ከሊንኩ መቀበያ
         const urlParams = new URLSearchParams(window.location.search);
         const balance = urlParams.get('balance') || '5000';
         const players = urlParams.get('players') || '0';
         const ferash = urlParams.get('ferash') || '0';
         const status = urlParams.get('status') || 'በቂ ተጫዋች እየተጠባበቀ ነው...';
 
-        // መረጃዎቹን በዲዛይኑ ላይ መተካት
         document.getElementById('wallet-bal').innerText = balance + " ብር";
         document.getElementById('total-players').innerText = players;
         document.getElementById('ferash-pool').innerText = ferash + " ብር";
@@ -151,41 +215,87 @@
 
         const grid = document.getElementById('bingo-grid');
         const markedNumbers = [];
+        const cellsMap = {};
 
-        // ከ 1 እስከ 100 ቁጥሮችን በሰሌዳው ላይ መፍጠር
+        // 1-100 ቦርድ መፍጠር
         for (let i = 1; i <= 100; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.innerText = i;
+            cellsMap[i] = cell;
             
             cell.addEventListener('click', () => {
-                if (cell.classList.contains('selected')) {
-                    cell.classList.remove('selected');
-                    const index = markedNumbers.indexOf(i);
-                    if (index > -1) markedNumbers.splice(index, 1);
-                } else {
-                    cell.classList.add('selected');
-                    markedNumbers.push(i);
+                // ጨዋታው ገና ካልተጀመረ መምረጥ ይችላል
+                if (!cell.classList.contains('called')) {
+                    if (cell.classList.contains('selected')) {
+                        cell.classList.remove('selected');
+                        const index = markedNumbers.indexOf(i);
+                        if (index > -1) markedNumbers.splice(index, 1);
+                    } else {
+                        cell.classList.add('selected');
+                        markedNumbers.push(i);
+                    }
                 }
             });
             grid.appendChild(cell);
         }
 
-        // 🌟 "ምርጫዬን አረጋግጣለሁ" ሲጫን ዳታውን ወደ ቴሌግራም ቦት (Python) መላኪያ 🌟
+        // "ምርጫዬን አረጋግጣለሁ" ሲጫን የቀጥታ ጨዋታ ዳሽቦርዱ ይጀምራል
         document.getElementById('confirm-btn').addEventListener('click', () => {
             if (markedNumbers.length === 0) {
                 alert("እባክዎ መጀመሪያ ቢያንስ አንድ ቁጥር ይምረጡ!");
                 return;
             }
 
-            // ለቦቱ የሚላከው የተመረጡ ቁጥሮች መረጃ
-            const gameData = {
-                marked_numbers: markedNumbers
-            };
+            // የግርጌ ቁልፉን መደበቅ (ጨዋታው ስለሚጀምር)
+            document.getElementById('confirm-btn').style.display = 'none';
+            document.getElementById('game-notif').innerText = "🎰 ኳሶች እየተወረወሩ ነው...";
 
-            // 🚀 ይህንን መረጃ ወደ ፓይተን ቦቱ ይልካል፣ ከዚያ ዌብ አፑን ይዘጋዋል!
-            tg.sendData(JSON.stringify(gameData));
-            tg.close();
+            // 25 የዕድል ቁጥሮችን በዘፈቀደ ማውጣት
+            const luckyBalls = [];
+            while (luckyBalls.length < 25) {
+                let r = Math.floor(Math.random() * 100) + 1;
+                if (!luckyBalls.includes(r)) luckyBalls.push(r);
+            }
+
+            let ballIndex = 0;
+            
+            // ቁጥሮቹን በየ 1.5 ሰከንድ ዳሽቦርዱ ላይ በየተራ የመጥራት ሂደት (Simulation)
+            const ballInterval = setInterval(() => {
+                if (ballIndex < luckyBalls.length) {
+                    let currentBall = luckyBalls[ballIndex];
+                    
+                    // በየትኛው የ B-I-N-G-O መስመር ውስጥ እንደሆነ መለየት
+                    let prefix = "";
+                    if (currentBall <= 20) prefix = "B-";
+                    else if (currentBall <= 40) prefix = "I-";
+                    else if (currentBall <= 60) prefix = "N-";
+                    else if (currentBall <= 80) prefix = "G-";
+                    else prefix = "O-";
+
+                    // ቢጫው ማሳያ ላይ ቁጥሩን በትልቅ ማሳየት
+                    document.getElementById('current-ball').innerText = prefix + currentBall;
+                    
+                    // ቦርዱ ላይ ቁጥሩን በቢጫ ማብራት
+                    if (cellsMap[currentBall]) {
+                        cellsMap[currentBall].classList.add('called');
+                    }
+
+                    ballIndex++;
+                } else {
+                    clearInterval(ballInterval);
+                    document.getElementById('game-notif').innerText = "🏁 ዙሩ ተጠናቋል! ውጤቱ ወደ ቦቱ እየተላከ ነው...";
+                    
+                    // ጨዋታው ሲያልቅ ዳታውን ወደ ቴሌግራም ፓይተን ቦት መላክ
+                    setTimeout(() => {
+                        const gameData = {
+                            marked_numbers: markedNumbers
+                        };
+                        tg.sendData(JSON.stringify(gameData));
+                        tg.close();
+                    }, 2000);
+                }
+            }, 1200); // በየ 1.2 ሰከንዱ አዲስ ቁጥር ይጠራል
         });
     </script>
 </body>
