@@ -3,147 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperBingo 2026</title>
+    <title>DIL BINGO STYLE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #1a1a2e;
+            background-color: #121225;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 10px;
+            user-select: none;
         }
-        .header-panel {
+        /* የላይኛው ማሳያ ሰሌዳ */
+        .top-bar {
             display: flex;
-            justify-content: space-around;
-            background: #16162a;
-            padding: 10px;
+            justify-content: space-between;
+            background: #1e1e38;
+            padding: 8px 12px;
             border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #2e2e4f;
-        }
-        .stat-box {
-            font-size: 12px;
-            color: #8b8baf;
-        }
-        .stat-val {
-            font-size: 16px;
+            font-size: 11px;
+            text-align: center;
             font-weight: bold;
-            color: #00ffcc;
-            margin-top: 3px;
+            margin-bottom: 10px;
         }
-        .grid-container {
+        .top-box span {
+            display: block;
+            color: #a2a2d0;
+            margin-bottom: 3px;
+        }
+        .top-box div {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        /* ዋናው የጨዋታ ክፍል አቀማመጥ */
+        .main-layout {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* የግራ ክፍያ (1-75 የቢንጎ ቁጥሮች ሰሌዳ) */
+        .bingo-board {
+            flex: 1.2;
+            background: #1a1a30;
+            padding: 8px;
+            border-radius: 10px;
+        }
+        .letters-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .letter-header {
+            width: 18%;
+            padding: 5px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+        }
+        .b-h { background: #007bff; } .i-h { background: #6f42c1; }
+        .n-h { background: #e83e8c; } .g-h { background: #28a745; } .o-h { background: #fd7e14; }
+
+        .numbers-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            max-width: 360px;
-            margin: 0 auto;
-            background: #16162a;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #2e2e4f;
+            gap: 4px;
         }
-        .cell {
-            background: #242442;
-            border: 1px solid #3d3d6b;
-            border-radius: 6px;
-            padding: 12px 0;
-            font-size: 16px;
+        .num-cell {
+            background: #252545;
+            border-radius: 4px;
+            padding: 6px 0;
+            font-size: 12px;
             font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
+            text-align: center;
+            color: #b5b5d8;
         }
-        .cell:active {
-            transform: scale(0.95);
+        .num-cell.called { background: #00ea97; color: #000; }
+        .num-cell.last-called { background: #fd7e14; color: #fff; animation: pulse 0.5s infinite alternate; }
+
+        /* የቀኝ ክፍል (ትልቁ ቁጥር ማሳያ እና ሁኔታው) */
+        .status-panel {
+            flex: 0.8;
+            background: #1a1a30;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .cell.selected {
-            background: #ff6600;
-            border-color: #ff9933;
-            box-shadow: 0 0 10px #ff6600;
+        .current-ball-circle {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #ffc107;
+            color: #121225;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
         }
-        .action-btn {
-            background: #4e54c8;
-            color: white;
-            border: none;
+        .watch-box {
+            margin-top: 25px;
+            text-align: center;
+            background: #222240;
+            padding: 15px 8px;
             border-radius: 8px;
-            padding: 14px;
-            width: 100%;
-            max-width: 360px;
-            font-size: 18px;
+            width: 90%;
+        }
+        .watch-title { font-size: 16px; font-weight: bold; color: #fff; letter-spacing: 1px; }
+        .watch-desc { font-size: 11px; color: #a2a2d0; margin-top: 15px; line-height: 1.5; }
+
+        /* የግርጌ ቁልፎች */
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            gap: 8px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
             font-weight: bold;
-            margin-top: 20px;
+            font-size: 13px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.4);
         }
-        .action-btn:disabled {
-            background: #444455;
-            color: #888899;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
+        .btn-leave { background: #dc3545; color: white; }
+        .btn-refresh { background: #343a40; color: white; }
+        .btn-watch { background: #6c757d; color: #ccc; cursor: not-allowed; }
+
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <!-- የላይኛው መረጃ ሰሌዳ -->
-    <div class="header-panel">
-        <div class="stat-box">WALLET<div class="stat-val" id="wallet-val">5000 ብር</div></div>
-        <div class="stat-box">PLAYERS<div class="stat-val" id="players-val">0</div></div>
-        <div class="stat-box">ፈራሽ<div class="stat-val" id="ferash-val">0 ብር</div></div>
-        <div class="stat-box">ROUND<div class="stat-val" id="round-val">#1001</div></div>
+    <div class="top-bar">
+        <div class="top-box"><span>Game ID</span><div id="game-id">DBXQ...</div></div>
+        <div class="top-box"><span>Players</span><div id="players">0</div></div>
+        <div class="top-box"><span>Bet</span><div id="bet">10</div></div>
+        <div class="top-box"><span>Derash</span><div id="derash">0</div></div>
+        <div class="top-box"><span>Called</span><div id="called-count">0</div></div>
     </div>
 
-    <h3 style="color: #ffcc00; margin: 10px 0;">🎰 የካርቴል ቁጥርዎን ይምረጡ</h3>
+    <div class="main-layout">
+        <div class="bingo-board">
+            <div class="letters-row">
+                <div class="letter-header b-h">B</div>
+                <div class="letter-header i-h">I</div>
+                <div class="letter-header n-h">N</div>
+                <div class="letter-header g-h">G</div>
+                <div class="letter-header o-h">O</div>
+            </div>
+            <div class="numbers-grid" id="numbers-container"></div>
+        </div>
 
-    <!-- 1-25 የካርቴል ምርጫ ማውጫ ማሳያ (ልክ እንደ Dil Bingo) -->
-    <div class="grid-container" id="bingo-grid"></div>
+        <div class="status-panel">
+            <div style="font-size: 11px; color: #ffc107; font-weight: bold;">AUTOMATIC</div>
+            <div class="current-ball-circle" id="big-ball">-</div>
+            
+            <div class="watch-box">
+                <div class="watch-title">WATCHING ONLY</div>
+                <div class="watch-desc">የዚህ ዙር ጨዋታ ተጀምሯል። አዲስ ዙር እስኪጀምር እዚህ ይጠብቁ።</div>
+            </div>
+        </div>
+    </div>
 
-    <!-- ማረጋገጫ ቁልፍ -->
-    <button class="action-btn" id="confirm-btn" onclick="submitSelection()" disabled>CONFIRM (እርግጠኛ ነኝ)</button>
+    <div class="bottom-actions">
+        <button class="btn btn-leave" onclick="closeApp()">LEAVE</button>
+        <button class="btn btn-refresh" onclick="location.reload()">REFRESH</button>
+        <button class="btn btn-watch">WATCHING</button>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ዌብ አፑን ሙሉ ገጽ ያደርገዋል
+        tg.expand();
 
-        // URL ላይ የመጡ የቦት ዳታዎችን ማንበብ
-        const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.get('balance')) document.getElementById('wallet-val').innerText = urlParams.get('balance') + " ብር";
-        if(urlParams.get('players')) document.getElementById('players-val').innerText = urlParams.get('players');
-        if(urlParams.get('ferash')) document.getElementById('ferash-val').innerText = urlParams.get('ferash') + " ብር";
-        if(urlParams.get('game_id')) document.getElementById('round-val').innerText = "#" + urlParams.get('game_id');
-
-        let selectedCartel = null;
-        const grid = document.getElementById('bingo-grid');
-
-        // 25 የካርቴል መምረጫ ቁልፎችን መፍጠር
-        for (let i = 1; i <= 25; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.innerText = i;
-            cell.onclick = () => selectCell(i, cell);
-            grid.appendChild(cell);
-        }
-
-        function selectCell(num, element) {
-            // የድሮውን ምርጫ ማንሳት
-            const activeCell = document.querySelector('.cell.selected');
-            if (activeCell) activeCell.classList.remove('selected');
-
-            // አዲሱን መምረጥ
-            selectedCartel = num;
-            element.classList.add('selected');
-            document.getElementById('confirm-btn').disabled = false;
-        }
-
-        // መረጃውን ወደ ቴሌግራም ቦት መልሶ መላኪያ ዋናው ሲስተም (ልክ እንደ Dil Bingo)
-        function submitSelection() {
-            if (selectedCartel !== null) {
-                const dataToSend = { cartel_num: selectedCartel };
-                tg.sendData(JSON.stringify(dataToSend)); // ዳታውን ወደ Python ቦት ይልካል
-                tg.close(); // ዌብ አፑን በራሱ ይዘጋዋል
+        // 1-75 ቁጥሮችን በ አቀማመጥ መደርደር (B=1-15, I=16-30, N=31-45, G=46-60, O=61-75)
+        const container = document.getElementById('numbers-container');
+        let htmlContent = '';
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 5; col++) {
+                let num = (col * 15) + row + 1;
+                htmlContent += `<div class="num-cell" id="cell-${num}">${num}</div>`;
             }
         }
+        container.innerHTML = htmlContent;
+
+        // ከቦቱ የመጡ የዳታ መረጃዎችን ማንበብ
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('game-id').innerText = urlParams.get('game_id') || "DBXQKJJA";
+        document.getElementById('players').innerText = urlParams.get('players') || "0";
+        document.getElementById('derash').innerText = urlParams.get('derash') || "0";
+
+        // ቁጥሮች ሲወጡ በየሴኮንዱ ከቦቱ ጋር የሚያገናኝ የቀጥታ አሰራር (Real-time Update)
+        const calledBallsStr = urlParams.get('called_balls') || "";
+        if (calledBallsStr) {
+            const balls = calledBallsStr.split(',').map(Number);
+            document.getElementById('called-count').innerText = balls.length;
+            
+            balls.forEach((ball, index) => {
+                const cell = document.getElementById(`cell-${ball}`);
+                if (cell) {
+                    if (index === balls.length - 1) {
+                        cell.className = 'num-cell last-called';
+                        let prefix = ball <= 15 ? "B" : ball <= 30 ? "I" : ball <= 45 ? "N" : ball <= 60 ? "G" : "O";
+                        document.getElementById('big-ball').innerText = `${prefix}-${ball}`;
+                    } else {
+                        cell.className = 'num-cell called';
+                    }
+                }
+            });
+        }
+
+        function closeApp() { tg.close(); }
     </script>
 </body>
 </html>
