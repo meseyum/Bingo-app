@@ -3,224 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIL BINGO STYLE</title>
+    <title>Dil Bingo Play Screen</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #121225;
+            background-color: #1a1530;
             color: #ffffff;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            user-select: none;
+            padding-bottom: 70px; /* ለግርጌ ሜኑ ቦታ መተው */
         }
-        /* የላይኛው ማሳያ ሰሌዳ */
-        .top-bar {
+        /* የላይኛው ረድፍ ቁልፎች */
+        .top-nav {
             display: flex;
             justify-content: space-between;
-            background: #1e1e38;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
-        .top-box span {
-            display: block;
-            color: #a2a2d0;
-            margin-bottom: 3px;
-        }
-        .top-box div {
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        /* ዋናው የጨዋታ ክፍል አቀማመጥ */
-        .main-layout {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* የግራ ክፍያ (1-75 የቢንጎ ቁጥሮች ሰሌዳ) */
-        .bingo-board {
-            flex: 1.2;
-            background: #1a1a30;
-            padding: 8px;
-            border-radius: 10px;
-        }
-        .letters-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .letter-header {
-            width: 18%;
-            padding: 5px 0;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
-            font-size: 14px;
-        }
-        .b-h { background: #007bff; } .i-h { background: #6f42c1; }
-        .n-h { background: #e83e8c; } .g-h { background: #28a745; } .o-h { background: #fd7e14; }
-
-        .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-        }
-        .num-cell {
-            background: #252545;
-            border-radius: 4px;
-            padding: 6px 0;
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            color: #b5b5d8;
-        }
-        .num-cell.called { background: #00ea97; color: #000; }
-        .num-cell.last-called { background: #fd7e14; color: #fff; animation: pulse 0.5s infinite alternate; }
-
-        /* የቀኝ ክፍል (ትልቁ ቁጥር ማሳያ እና ሁኔታው) */
-        .status-panel {
-            flex: 0.8;
-            background: #1a1a30;
-            border-radius: 10px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .current-ball-circle {
-            width: 75px;
-            height: 75px;
-            border-radius: 50%;
-            background: #fff;
-            border: 4px solid #ffc107;
-            color: #121225;
-            font-size: 24px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .watch-box {
-            margin-top: 25px;
-            text-align: center;
-            background: #222240;
-            padding: 15px 8px;
-            border-radius: 8px;
-            width: 90%;
-        }
-        .watch-title { font-size: 16px; font-weight: bold; color: #fff; letter-spacing: 1px; }
-        .watch-desc { font-size: 11px; color: #a2a2d0; margin-top: 15px; line-height: 1.5; }
-
-        /* የግርጌ ቁልፎች */
-        .bottom-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 12px;
-            gap: 8px;
-        }
-        .btn {
-            flex: 1;
-            padding: 10px;
+        .nav-btn {
+            background: #2e264f;
             border: none;
+            color: #fff;
+            padding: 8px 15px;
             border-radius: 6px;
-            font-weight: bold;
             font-size: 13px;
+            font-weight: bold;
             cursor: pointer;
         }
-        .btn-leave { background: #dc3545; color: white; }
-        .btn-refresh { background: #343a40; color: white; }
-        .btn-watch { background: #6c757d; color: #ccc; cursor: not-allowed; }
+        /* የዳታ ማሳያ ሳጥኖች */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            background: #231b42;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .stat-box span {
+            display: block;
+            color: #897fa6;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .stat-box div {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .timer-highlight {
+            color: #ffcc00;
+            font-size: 16px !important;
+        }
 
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+        /* የቢንጎ ቁጥሮች ዋና ሰሌዳ */
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            background: #231b42;
+            padding: 12px;
+            border-radius: 12px;
+        }
+        .num-cell {
+            background: #2e264f;
+            border-radius: 6px;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            color: #c9c1e6;
+            transition: background 0.3s;
+        }
+        /* በፎቶው ላይ እንዳለው የወጡ ቁጥሮች ቀይ/ብርቱካንማ ይሆናሉ */
+        .num-cell.called {
+            background: #d84b16;
+            color: #ffffff;
+        }
+
+        /* ከታች የሚታየው ዋናው የሜኑ አሞሌ (Bottom Navigation) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #150f26;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #2e264f;
+        }
+        .menu-item {
+            text-align: center;
+            color: #897fa6;
+            font-size: 11px;
+            text-decoration: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        .menu-item.active {
+            color: #00ffcc;
+        }
+        .menu-item i {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="top-box"><span>Game ID</span><div id="game-id">DBXQ...</div></div>
-        <div class="top-box"><span>Players</span><div id="players">0</div></div>
-        <div class="top-box"><span>Bet</span><div id="bet">10</div></div>
-        <div class="top-box"><span>Derash</span><div id="derash">0</div></div>
-        <div class="top-box"><span>Called</span><div id="called-count">0</div></div>
+    <!-- የላይኛው አሰሳ -->
+    <div class="top-nav">
+        <button class="nav-btn" onclick="Telegram.WebApp.close()">⬅ Back</button>
+        <button class="nav-btn" onclick="location.reload()">🔄 Refresh</button>
     </div>
 
-    <div class="main-layout">
-        <div class="bingo-board">
-            <div class="letters-row">
-                <div class="letter-header b-h">B</div>
-                <div class="letter-header i-h">I</div>
-                <div class="letter-header n-h">N</div>
-                <div class="letter-header g-h">G</div>
-                <div class="letter-header o-h">O</div>
-            </div>
-            <div class="numbers-grid" id="numbers-container"></div>
-        </div>
-
-        <div class="status-panel">
-            <div style="font-size: 11px; color: #ffc107; font-weight: bold;">AUTOMATIC</div>
-            <div class="current-ball-circle" id="big-ball">-</div>
-            
-            <div class="watch-box">
-                <div class="watch-title">WATCHING ONLY</div>
-                <div class="watch-desc">የዚህ ዙር ጨዋታ ተጀምሯል። አዲስ ዙር እስኪጀምር እዚህ ይጠብቁ።</div>
-            </div>
-        </div>
+    <!-- የዳታዎች ሰሌዳ -->
+    <div class="stats-row">
+        <div class="stat-box"><span>Main Wallet</span><div id="main-wallet">0</div></div>
+        <div class="stat-box"><span>Play Wallet</span><div id="play-wallet">0</div></div>
+        <div class="stat-box"><span>Stake</span><div>10</div></div>
+        <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">35 s</div></div>
     </div>
 
-    <div class="bottom-actions">
-        <button class="btn btn-leave" onclick="closeApp()">LEAVE</button>
-        <button class="btn btn-refresh" onclick="location.reload()">REFRESH</button>
-        <button class="btn btn-watch">WATCHING</button>
+    <!-- የቁጥሮች ማሳያ ሰሌዳ (1-88 ወይም እስከ 100 መደርደር ይቻላል) -->
+    <div class="numbers-grid" id="bingo-board"></div>
+
+    <!-- የፎቶው የታችኛው ሜኑ (Bottom Navigation) -->
+    <div class="bottom-nav">
+        <div class="menu-item active">🎮<br>GAME</div>
+        <div class="menu-item">🏆<br>SCORES</div>
+        <div class="menu-item">🕒<br>HISTORY</div>
+        <div class="menu-item">💼<br>WALLET</div>
+        <div class="menu-item">👤<br>PROFILE</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1-75 ቁጥሮችን በ አቀማመጥ መደርደር (B=1-15, I=16-30, N=31-45, G=46-60, O=61-75)
-        const container = document.getElementById('numbers-container');
-        let htmlContent = '';
-        for (let row = 0; row < 15; row++) {
-            for (let col = 0; col < 5; col++) {
-                let num = (col * 15) + row + 1;
-                htmlContent += `<div class="num-cell" id="cell-${num}">${num}</div>`;
-            }
+        // 1-88 ቁጥሮችን በሰሌዳው ላይ መደርደር
+        const board = document.getElementById('bingo-board');
+        for (let i = 1; i <= 88; i++) {
+            board.innerHTML += `<div class="num-cell" id="cell-${i}">${i}</div>`;
         }
-        container.innerHTML = htmlContent;
 
-        // ከቦቱ የመጡ የዳታ መረጃዎችን ማንበብ
+        // ከቦቱ የመጡ የቀጥታ መረጃዎችን ማንበብ
         const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('game-id').innerText = urlParams.get('game_id') || "DBXQKJJA";
-        document.getElementById('players').innerText = urlParams.get('players') || "0";
-        document.getElementById('derash').innerText = urlParams.get('derash') || "0";
+        document.getElementById('main-wallet').innerText = urlParams.get('balance') || "0";
+        
+        // የሰከንድ ቆጣሪ አሰራር (ከ 35 ሰከንድ ጀምሮ ወደ ታች ይቆጥራል)
+        let timeLeft = 35;
+        const timerElement = document.getElementById('timer');
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElement.innerText = timeLeft + " s";
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerElement.innerText = "Next Round";
+            }
+        }, 1000);
 
-        // ቁጥሮች ሲወጡ በየሴኮንዱ ከቦቱ ጋር የሚያገናኝ የቀጥታ አሰራር (Real-time Update)
+        // በፓይተን የወጡትን ቁጥሮች ተቀብሎ ቀይ ማድረጊያ ህግ
         const calledBallsStr = urlParams.get('called_balls') || "";
         if (calledBallsStr) {
             const balls = calledBallsStr.split(',').map(Number);
-            document.getElementById('called-count').innerText = balls.length;
-            
-            balls.forEach((ball, index) => {
+            balls.forEach(ball => {
                 const cell = document.getElementById(`cell-${ball}`);
                 if (cell) {
-                    if (index === balls.length - 1) {
-                        cell.className = 'num-cell last-called';
-                        let prefix = ball <= 15 ? "B" : ball <= 30 ? "I" : ball <= 45 ? "N" : ball <= 60 ? "G" : "O";
-                        document.getElementById('big-ball').innerText = `${prefix}-${ball}`;
-                    } else {
-                        cell.className = 'num-cell called';
-                    }
+                    cell.classList.add('called'); // ቀይ ያደርገዋል
                 }
             });
         }
-
-        function closeApp() { tg.close(); }
     </script>
 </body>
 </html>
