@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dil Bingo Play Screen</title>
+    <title>SuperBingo2026 Live Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -12,9 +12,9 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            padding-bottom: 70px; /* ለግርጌ ሜኑ ቦታ መተው */
+            padding-bottom: 70px;
+            user-select: none;
         }
-        /* የላይኛው ረድፍ ቁልፎች */
         .top-nav {
             display: flex;
             justify-content: space-between;
@@ -28,9 +28,7 @@
             border-radius: 6px;
             font-size: 13px;
             font-weight: bold;
-            cursor: pointer;
         }
-        /* የዳታ ማሳያ ሳጥኖች */
         .stats-row {
             display: flex;
             justify-content: space-between;
@@ -56,8 +54,6 @@
             color: #ffcc00;
             font-size: 16px !important;
         }
-
-        /* የቢንጎ ቁጥሮች ዋና ሰሌዳ */
         .numbers-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -74,15 +70,15 @@
             font-weight: bold;
             text-align: center;
             color: #c9c1e6;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
         }
-        /* በፎቶው ላይ እንዳለው የወጡ ቁጥሮች ቀይ/ብርቱካንማ ይሆናሉ */
+        /* እውነተኛው ጨዋታ ሲጀምር የሚበሩት ቀይ ቁጥሮች */
         .num-cell.called {
-            background: #d84b16;
-            color: #ffffff;
+            background: #d84b16 !important;
+            color: #ffffff !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 8px #d84b16;
         }
-
-        /* ከታች የሚታየው ዋናው የሜኑ አሞሌ (Bottom Navigation) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -98,40 +94,27 @@
             text-align: center;
             color: #897fa6;
             font-size: 11px;
-            text-decoration: none;
-            cursor: pointer;
-            flex: 1;
         }
-        .menu-item.active {
-            color: #00ffcc;
-        }
-        .menu-item i {
-            display: block;
-            font-size: 18px;
-            margin-bottom: 3px;
-        }
+        .menu-item.active { color: #00ffcc; }
     </style>
 </head>
 <body>
 
-    <!-- የላይኛው አሰሳ -->
     <div class="top-nav">
         <button class="nav-btn" onclick="Telegram.WebApp.close()">⬅ Back</button>
         <button class="nav-btn" onclick="location.reload()">🔄 Refresh</button>
     </div>
 
-    <!-- የዳታዎች ሰሌዳ -->
     <div class="stats-row">
-        <div class="stat-box"><span>Main Wallet</span><div id="main-wallet">0</div></div>
-        <div class="stat-box"><span>Play Wallet</span><div id="play-wallet">0</div></div>
+        <div class="stat-box"><span>Main Wallet</span><div id="main-wallet">2500</div></div>
+        <div class="stat-box"><span>Play Wallet</span><div>0</div></div>
         <div class="stat-box"><span>Stake</span><div>10</div></div>
-        <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">35 s</div></div>
+        <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">-- s</div></div>
     </div>
 
-    <!-- የቁጥሮች ማሳያ ሰሌዳ (1-88 ወይም እስከ 100 መደርደር ይቻላል) -->
+    <!-- 1-88 የቁጥር ሰሌዳ -->
     <div class="numbers-grid" id="bingo-board"></div>
 
-    <!-- የፎቶው የታችኛው ሜኑ (Bottom Navigation) -->
     <div class="bottom-nav">
         <div class="menu-item active">🎮<br>GAME</div>
         <div class="menu-item">🏆<br>SCORES</div>
@@ -144,39 +127,41 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1-88 ቁጥሮችን በሰሌዳው ላይ መደርደር
+        // ሰሌዳውን መፍጠር
         const board = document.getElementById('bingo-board');
         for (let i = 1; i <= 88; i++) {
             board.innerHTML += `<div class="num-cell" id="cell-${i}">${i}</div>`;
         }
 
-        // ከቦቱ የመጡ የቀጥታ መረጃዎችን ማንበብ
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('main-wallet').innerText = urlParams.get('balance') || "0";
-        
-        // የሰከንድ ቆጣሪ አሰራር (ከ 35 ሰከንድ ጀምሮ ወደ ታች ይቆጥራል)
-        let timeLeft = 35;
-        const timerElement = document.getElementById('timer');
-        const countdown = setInterval(() => {
-            timeLeft--;
-            timerElement.innerText = timeLeft + " s";
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                timerElement.innerText = "Next Round";
-            }
-        }, 1000);
+        // 🔄 ዋናው ማጫወቻ ሲስተም፡ በየ 2 ሴኮንዱ ከፓይተን ቦቱ ላይ የቀጥታ መረጃ በራሱ ይጎትታል (ያለ ማደስ)
+        async def fetchLiveGameStatus() {
+            try {
+                // ይህ የምታየው ፖርት (localhost:8080) ከፓይተን ቦትህ ጋር በቀጥታ ይገናኛል
+                const response = await fetch('http://localhost:8080/status');
+                const data = await response.json();
+                
+                // 1. የሰከንድ ቆጣሪውን በራሱ ማደስ
+                document.getElementById('timer').innerText = data.time_left + " s";
+                document.getElementById('main-wallet').innerText = data.wallet;
 
-        // በፓይተን የወጡትን ቁጥሮች ተቀብሎ ቀይ ማድረጊያ ህግ
-        const calledBallsStr = urlParams.get('called_balls') || "";
-        if (calledBallsStr) {
-            const balls = calledBallsStr.split(',').map(Number);
-            balls.forEach(ball => {
-                const cell = document.getElementById(`cell-${ball}`);
-                if (cell) {
-                    cell.classList.add('called'); // ቀይ ያደርገዋል
+                // 2. ሁሉንም ቁጥሮች መጀመሪያ ማጽዳት
+                for (let i = 1; i <= 88; i++) {
+                    document.getElementById(`cell-${i}`).classList.remove('called');
                 }
-            });
+
+                // 3. አዳዲስ የወጡትን ቁጥሮች በራሱ ጊዜ ቀይ ማድረግ (ማጫወት)
+                data.called_balls.forEach(ball => {
+                    const cell = document.getElementById(`cell-${ball}`);
+                    if (cell) cell.classList.add('called');
+                });
+
+            } catch (error) {
+                console.log("የቀጥታ ግንኙነት በመጠባበቅ ላይ...");
+            }
         }
+
+        // በየ 2 ሰከንድ (2000ms) በራሱ አዲስ መረጃ እንዲያመጣ ማዘዝ
+        setInterval(fetchLiveGameStatus, 2000);
     </script>
 </body>
 </html>
