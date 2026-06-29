@@ -3,167 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperBingo 2026 - Ultra Smooth</title>
+    <title>SuperBingo 2026 - Real Cartel Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #1a1530;
+            background-color: #161229;
             color: #ffffff;
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            padding: 12px;
+            padding: 10px;
             padding-bottom: 80px;
             user-select: none;
-            -webkit-user-select: none;
         }
-        .top-nav {
+        .header-box {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        .nav-btn {
-            background: #2e264f;
-            border: none;
-            color: #ffffff;
-            padding: 10px 18px;
+            background: #1f1a3a;
+            padding: 10px;
             border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            background: #231b42;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 10px;
+            font-size: 12px;
             text-align: center;
         }
-        .stat-box span {
+        .header-box div span {
             display: block;
             color: #897fa6;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
+            font-size: 10px;
+            margin-bottom: 3px;
         }
-        .stat-box div {
-            font-size: 15px;
-            font-weight: bold;
-        }
-        .timer-highlight {
-            color: #ffcc00 !important;
-            font-size: 17px !important;
-        }
-        .numbers-grid {
+        .main-board {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
-            background: #231b42;
-            padding: 14px;
-            border-radius: 14px;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            background: #1f1a3a;
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
-        .num-cell {
-            background: #2e264f;
-            border-radius: 8px;
-            padding: 12px 0;
-            font-size: 15px;
-            font-weight: bold;
-            text-align: center;
-            color: #c9c1e6;
-            transition: all 0.2s ease;
-        }
-        /* የወጡ ቁጥሮች ቀይ የሚሆኑበት */
-        .num-cell.called {
-            background: #d84b16 !important;
-            color: #ffffff !important;
-            transform: scale(1.05);
-            box-shadow: 0 0 10px #d84b16;
-        }
-        /* የመጨረሻው የወጣው ቁጥር ምልክት */
-        .num-cell.last-called {
-            background: #ffcc00 !important;
-            color: #1a1530 !important;
-            box-shadow: 0 0 15px #ffcc00;
-        }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #150f26;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 2px solid #2e264f;
-        }
-        .menu-item {
-            text-align: center;
-            color: #897fa6;
+        .board-cell {
+            background: #2a244d;
             font-size: 11px;
-            flex: 1;
+            font-weight: bold;
+            padding: 8px 0;
+            text-align: center;
+            border-radius: 4px;
+            color: #a59bcf;
         }
-        .menu-item.active { color: #00ffcc; }
+        .board-cell.called {
+            background: #d84b16 !important;
+            color: #fff !important;
+            box-shadow: 0 0 5px #d84b16;
+        }
+        .board-cell.last-called {
+            background: #00ffcc !important;
+            color: #161229 !important;
+            box-shadow: 0 0 8px #00ffcc;
+        }
+
+        /* 🎰 የቢንጎ ተጫዋች ካርቴላ (Cartel) ዲዛይን */
+        .cartel-container {
+            background: #231d42;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #3d336b;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .cartel-title {
+            text-align: center;
+            font-weight: bold;
+            color: #ffcc00;
+            font-size: 13px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .cartel-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+        .cartel-cell {
+            background: #ffffff;
+            color: #1d183a;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 0;
+            text-align: center;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .cartel-cell.star {
+            background: #ffcc00 !important;
+            color: #161229 !important;
+            font-size: 18px;
+        }
+        /* እጣው ሲወጣ ካርቴላው ላይ በራሱ አረንጓዴ ሆኖ የሚበራው ህግ */
+        .cartel-cell.matched {
+            background: #20c997 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 8px #20c997;
+            transform: scale(1.02);
+        }
+
+        .status-bar {
+            background: #1f1a3a;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #00ffcc;
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-nav">
-        <button class="nav-btn" onclick="Telegram.WebApp.close()">⬅ Back</button>
-        <button class="nav-btn" onclick="location.reload()">🔄 Refresh</button>
+    <div class="header-box">
+        <div><span>WALLET</span><div style="color: #20c997;" id="wallet-val">5000 ብር</div></div>
+        <div><span>BET</span><div>10</div></div>
+        <div><span>TIME LEFT</span><div style="color: #ffcc00;" id="timer-val">35 s</div></div>
+        <div><span>ROUND</span><div id="round-val">SuperBingo2026</div></div>
     </div>
 
-    <div class="stats-row">
-        <div class="stat-box"><span>Main Wallet</span><div id="main-wallet">2500</div></div>
-        <div class="stat-box"><span>Play Wallet</span><div id="play-wallet">0</div></div>
-        <div class="stat-box"><span>Stake</span><div>10</div></div>
-        <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">35 s</div></div>
+    <div class="main-board" id="bingo-main-board"></div>
+
+    <div class="cartel-container">
+        <div class="cartel-title" id="cartel-id">CARTEL #--</div>
+        <div class="cartel-grid" id="player-cartel-grid"></div>
     </div>
 
-    <div class="numbers-grid" id="bingo-board"></div>
-
-    <div class="bottom-nav">
-        <div class="menu-item active">🎮<br>GAME</div>
-        <div class="menu-item">🏆<br>SCORES</div>
-        <div class="menu-item">🕒<br>HISTORY</div>
-        <div class="menu-item">💼<br>WALLET</div>
-        <div class="menu-item">👤<br>PROFILE</div>
-    </div>
+    <div class="status-bar" id="game-status-text">🎰 በመጫወት ላይ...</div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1-88 ሰሌዳ መገንባት
-        const board = document.getElementById('bingo-board');
-        function buildBoard() {
-            board.innerHTML = "";
-            for (let i = 1; i <= 88; i++) {
-                board.innerHTML += `<div class="num-cell" id="cell-${i}">${i}</div>`;
+        // 1. 1-100 ዋናውን ሰሌዳ መገንባት
+        const mainBoard = document.getElementById('bingo-main-board');
+        function initMainBoard() {
+            mainBoard.innerHTML = "";
+            for (let i = 1; i <= 100; i++) {
+                mainBoard.innerHTML += `<div class="board-cell" id="b-cell-${i}">${i}</div>`;
             }
         }
-        buildBoard();
+        initMainBoard();
 
-        // ሂሳብ ማስተካከል
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('main-wallet').innerText = urlParams.get('balance') || "2500";
-        document.getElementById('play-wallet').innerText = urlParams.get('play_wallet') || "0";
-
-        // 🔊 🇪🇹 እጅግ ፈጣን የአማርኛ ድምፅ ማጉያ (ያለ ኢንተርኔት የሚሰራ)
-        function speakAmharic(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'am-ET'; // አማርኛ
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // 🎰 የጨዋታው አውቶማቲክ ሞተር
-        let timeLeft = 35;
-        let pool = Array.from({length: 88}, (_, i) => i + 1);
+        // 2. ለተጫዋቹ የራሱ የሆነ የካርቴላ ቁጥሮችን በራሱ ጊዜ ማመንጨት (5x5)
+        const cartelGrid = document.getElementById('player-cartel-grid');
+        let cartelNumbers = [];
         
+        function generateCartel() {
+            cartelGrid.innerHTML = "";
+            let uniqueNums = new Set();
+            while(uniqueNums.size < 24) {
+                uniqueNums.add(Math.floor(Math.random() * 100) + 1);
+            }
+            cartelNumbers = Array.from(uniqueNums);
+            
+            // የዘፈቀደ የካርቴላ ቁጥር መለያ መስጠት
+            document.getElementById('cartel-id').innerText = "CARTEL #" + (Math.floor(Math.random() * 900) + 100);
+
+            let index = 0;
+            for (let i = 0; i < 25; i++) {
+                if (i === 12) {
+                    // መሃል ላይ የምትገኘው ኮከብ (FREE SPACE ⭐)
+                    cartelGrid.innerHTML += `<div class="cartel-cell star">⭐</div>`;
+                } else {
+                    let num = cartelNumbers[index++];
+                    cartelGrid.innerHTML += `<div class="cartel-cell" id="c-cell-${num}">${num}</div>`;
+                }
+            }
+        }
+        generateCartel();
+
+        // 3. 🎰 አውቶማቲክ የጨዋታ ሞተር ህግ
+        let timeLeft = 35;
+        let pool = Array.from({length: 100}, (_, i) => i + 1);
         function shuffle(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -172,32 +187,46 @@
         }
         shuffle(pool);
 
-        const engine = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer').innerText = timeLeft + " s";
+        function speakAmharic(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'am-ET';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
 
-            // በየ 1.5 ሰከንዱ ቁጥር መጥራት
+        const gameEngine = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer-val').innerText = timeLeft + " s";
+
+            // በየ 1.5 ሰከንዱ ቁጥር ማውጣት
             if (timeLeft > 5 && timeLeft % 2 === 0 && pool.length > 0) {
                 let currentBall = pool.pop();
                 
-                // ሁሉንም ነባር የመጨረሻ ቁጥሮች ማጽዳት
-                document.querySelectorAll('.num-cell').forEach(c => c.classList.remove('last-called'));
+                // የድሮ የመጨረሻ ቁጥር ምልክትን ማጥፋት
+                document.querySelectorAll('.board-cell').forEach(c => c.classList.remove('last-called'));
                 
-                const cell = document.getElementById(`cell-${currentBall}`);
-                if (cell) {
-                    cell.classList.add('called', 'last-called');
+                // 1. ዋናው ሰሌዳ ላይ በቀይ ማብራት
+                const mainCell = document.getElementById(`b-cell-${currentBall}`);
+                if (mainCell) mainCell.classList.add('called', 'last-called');
+                
+                // 2. ማረጋገጫ፡ የወጣው ቁጥር በተጫዋቹ ካርቴላ ላይ ካለ በራሱ አረንጓዴ ያደርገዋል!
+                const cartelCell = document.getElementById(`c-cell-${currentBall}`);
+                if (cartelCell) {
+                    cartelCell.classList.add('matched');
+                    tg.HapticFeedback.impactOccurred('medium'); // ስልኩን እረገጥ ያደርገዋል
                 }
-                
-                // ድምፅ ማሰማት
+
                 speakAmharic("ቁጥር " + currentBall);
             }
 
-            // ዙር ማለቂያ ህግ
+            // ዙር ሲያልቅ በራሱ አዲስ ካርቴላ እና አዲስ ዙር መጀመር
             if (timeLeft <= 0) {
                 timeLeft = 35;
                 shuffle(pool);
-                buildBoard();
-                speakAmharic("አዲስ ዙር ተጀምሯል");
+                initMainBoard();
+                generateCartel(); // አዲስ ካርቴላ መስጠት
+                speakAmharic("ቢንጎ! አዲስ ዙር ተጀመረ");
             }
         }, 1000);
     </script>
