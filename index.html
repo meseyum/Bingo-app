@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperBingo2026 Live Game</title>
+    <title>SuperBingo 2026 - Live Game Screen</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -11,75 +11,106 @@
             color: #ffffff;
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            padding: 10px;
-            padding-bottom: 70px;
+            padding: 12px;
+            padding-bottom: 80px;
             user-select: none;
+            -webkit-user-select: none;
         }
+        
+        /* የላይኛው የቁልፎች ረድፍ */
         .top-nav {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         .nav-btn {
             background: #2e264f;
             border: none;
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 6px;
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 8px;
             font-size: 13px;
             font-weight: bold;
             cursor: pointer;
+            transition: background 0.2s;
         }
+        .nav-btn:active {
+            background: #3d3266;
+        }
+
+        /* የዳታዎች ሰሌዳ (Wallets, Stake, Timer) */
         .stats-row {
             display: flex;
             justify-content: space-between;
             background: #231b42;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 18px;
             text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .stat-box {
+            flex: 1;
         }
         .stat-box span {
             display: block;
             color: #897fa6;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
         .stat-box div {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
+            color: #ffffff;
         }
         .timer-highlight {
-            color: #ffcc00;
-            font-size: 16px !important;
+            color: #ffcc00 !important;
+            font-size: 17px !important;
+            animation: pulse 1s infinite alternate;
         }
+
+        /* 1-88 ዋናው የቢንጎ ቁጥሮች ሰሌዳ */
         .numbers-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
+            gap: 8px;
             background: #231b42;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
         .num-cell {
             background: #2e264f;
-            border-radius: 6px;
-            padding: 10px 0;
-            font-size: 14px;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 15px;
             font-weight: bold;
             text-align: center;
             color: #c9c1e6;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
         }
-        /* የወጡ ቁጥሮች ቀይ/ብርቱካንማ የሚሆኑበት ውብ ማሳያ */
+        
+        /* 🎰 ጨዋታው ሲጀመር የወጡ ቁጥሮች የሚበሩበት እውነተኛው መልክ (ልክ እንደ ፎቶው) */
         .num-cell.called {
             background: #d84b16 !important;
             color: #ffffff !important;
-            transform: scale(1.05);
-            box-shadow: 0 0 8px #d84b16;
+            transform: scale(1.04);
+            box-shadow: 0 0 10px #d84b16;
+            border-color: #ff6633;
         }
+        
+        /* የመጨረሻው የወጣው ቁጥር ምልክት */
+        .num-cell.last-called {
+            background: #ffcc00 !important;
+            color: #1a1530 !important;
+            box-shadow: 0 0 15px #ffcc00;
+            transform: scale(1.08);
+        }
+
+        /* የታችኛው ዋና ሜኑ አሞሌ (Bottom Menu) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -88,98 +119,124 @@
             background: #150f26;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
-            border-top: 1px solid #2e264f;
+            padding: 12px 0;
+            border-top: 2px solid #2e264f;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
         }
         .menu-item {
             text-align: center;
             color: #897fa6;
             font-size: 11px;
+            font-weight: bold;
             flex: 1;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .menu-item.active { color: #00ffcc; }
+        .menu-item.active {
+            color: #00ffcc;
+        }
+        .menu-item span.icon {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
     </style>
 </head>
 <body>
 
+    <!-- የላይኛው አሰሳ -->
     <div class="top-nav">
-        <button class="nav-btn" onclick="Telegram.WebApp.close()">⬅ Back</button>
+        <button class="nav-btn" onclick="closeBingoApp()">⬅ Back</button>
         <button class="nav-btn" onclick="location.reload()">🔄 Refresh</button>
     </div>
 
+    <!-- የጨዋታው መረጃዎች ሰሌዳ -->
     <div class="stats-row">
         <div class="stat-box"><span>Main Wallet</span><div id="main-wallet">2500</div></div>
-        <div class="stat-box"><span>Play Wallet</span><div>0</div></div>
-        <div class="stat-box"><span>Stake</span><div>10</div></div>
+        <div class="stat-box"><span>Play Wallet</span><div id="play-wallet">0</div></div>
+        <div class="stat-box"><span>Stake</span><div id="stake-val">10</div></div>
         <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">35 s</div></div>
     </div>
 
-    <!-- 1-88 የቁጥር ሰሌዳ -->
+    <!-- ዋናው የ 1-88 ቁጥሮች ሰሌዳ -->
     <div class="numbers-grid" id="bingo-board"></div>
 
+    <!-- የታችኛው ፕሮፌሽናል ሜኑ -->
     <div class="bottom-nav">
-        <div class="menu-item active">🎮<br>GAME</div>
-        <div class="menu-item">🏆<br>SCORES</div>
-        <div class="menu-item">🕒<br>HISTORY</div>
-        <div class="menu-item">💼<br>WALLET</div>
-        <div class="menu-item">👤<br>PROFILE</div>
+        <div class="menu-item active" onclick="switchTab('game')"><span class="icon">🎮</span>GAME</div>
+        <div class="menu-item" onclick="switchTab('scores')"><span class="icon">🏆</span>SCORES</div>
+        <div class="menu-item" onclick="switchTab('history')"><span class="icon">🕒</span>HISTORY</div>
+        <div class="menu-item" onclick="switchTab('wallet')"><span class="icon">💼</span>WALLET</div>
+        <div class="menu-item" onclick="switchTab('profile')"><span class="icon">👤</span>PROFILE</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. 1-88 ቁጥሮችን በሰሌዳው ላይ መደርደር (ይህ አሁን በጭራሽ አይጠፋም!)
+        // 1. የ 1-88 ቁጥሮች ሰሌዳን በንፅህና መገንባት
         const board = document.getElementById('bingo-board');
-        function buildBoard() {
+        function initBoard() {
             board.innerHTML = "";
             for (let i = 1; i <= 88; i++) {
                 board.innerHTML += `<div class="num-cell" id="cell-${i}">${i}</div>`;
             }
         }
-        buildBoard();
+        initBoard();
 
-        // 2. 🎰 አውቶማቲክ የጨዋታ ማጫወቻ ህግ (የራሱ የሆነ የውስጥ ሞተር)
-        let timeLeft = 35;
-        let calledNumbers = [];
-        
-        // 1-88 ቁጥሮችን አደባልቆ ዝግጁ ማድረግ
-        let availableNumbers = Array.from({length: 88}, (_, i) => i + 1);
-        
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-        shuffle(availableNumbers);
+        // 2. ከቦቱ የተላኩ የቀጥታ የጨዋታ መረጃዎችን ማንበብ (URL Parsers)
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('main-wallet').innerText = urlParams.get('balance') || "2500";
+        document.getElementById('play-wallet').innerText = urlParams.get('play_wallet') || "0";
+        document.getElementById('stake-val').innerText = urlParams.get('stake') || "10";
 
-        // በየሰከንዱ የሚቆጥረውና ቁጥሮቹን ቀይ የሚያደርገው ዋናው ሲስተም
-        const gameInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer').innerText = timeLeft + " s";
+        const calledBallsStr = urlParams.get('called_balls') || "";
+        let serverTimer = parseInt(urlParams.get('time_left')) || 35;
 
-            // በየ 1.5 ሰከንዱ አንድ አዲስ ቁጥር በራሱ እያወጣ ቀይ ያደርጋል
-            if (timeLeft > 5 && timeLeft % 2 === 0 && availableNumbers.length > 0) {
-                let nextBall = availableNumbers.pop();
-                calledNumbers.push(nextBall);
-                
-                // በገጹ ላይ ቁጥሩን ፈልጎ ቀይ ማድረግ
-                const cell = document.getElementById(`cell-${nextBall}`);
+        // 3. የወጡ ቁጥሮችን በቀጥታ በሰሌዳው ላይ ቀይ/ብርቱካንማ ማድረግ
+        if (calledBallsStr) {
+            const balls = calledBallsStr.split(',').map(Number);
+            balls.forEach((ball, index) => {
+                const cell = document.getElementById(`cell-${ball}`);
                 if (cell) {
-                    cell.classList.add('called');
+                    if (index === balls.length - 1) {
+                        cell.classList.add('called', 'last-called'); // የመጨረሻው ቁጥር በቢጫ ይበራል
+                    } else {
+                        cell.classList.add('called'); // ሌሎቹ በቀይ ይበራሉ
+                    }
                 }
-            }
+            });
+        }
 
-            // ቆጣሪው 0 ሲደርስ ጨዋታውን አጽድቶ አዲስ ዙር በራሱ ይጀምራል
-            if (timeLeft <= 0) {
-                timeLeft = 35; // ወደ 35 ይመለሳል
-                calledNumbers = [];
-                availableNumbers = Array.from({length: 88}, (_, i) => i + 1);
-                shuffle(availableNumbers);
-                buildBoard(); // ሰሌዳውን መልሶ ማጽዳት
+        // 4. አውቶማቲክ የሰከንድ ቆጣሪ አሰራር
+        const timerElement = document.getElementById('timer');
+        const countdown = setInterval(() => {
+            serverTimer--;
+            if (serverTimer >= 0) {
+                timerElement.innerText = serverTimer + " s";
+            } else {
+                clearInterval(countdown);
+                timerElement.innerText = "0 s";
+                // ዙሩ ሲያልቅ በራሱ አዲስ መረጃ እንዲያመጣ ገጹን በጀርባ ማደስ
+                setTimeout(() => { location.reload(); }, 1000);
             }
         }, 1000);
+
+        // ሜኑዎችን መቀያየሪያ ተግባር
+        type switchTab(tab) {
+            // ለወደፊቱ እያንዳንዱን ገጽ እዚህ ማገናኘት ትችላለህ
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function closeBingoApp() {
+            tg.close();
+        }
     </script>
 </body>
 </html>
