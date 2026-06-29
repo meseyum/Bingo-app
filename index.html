@@ -2,267 +2,148 @@
 <html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SuperBingo2026 Auto-Loop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperBingo 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #0b0e14;
+            background-color: #1a1a2e;
             color: #ffffff;
-            margin: 0;
-            padding: 10px 10px 100px 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            user-select: none;
+            margin: 0;
+            padding: 10px;
         }
-        .header-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-            margin-bottom: 10px;
+        .header-panel {
+            display: flex;
+            justify-content: space-around;
+            background: #16162a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #2e2e4f;
         }
         .stat-box {
-            background: #161b26;
-            padding: 6px 2px;
-            border-radius: 6px;
-            border: 1px solid #232d3f;
+            font-size: 12px;
+            color: #8b8baf;
         }
-        .stat-box span { display: block; font-size: 9px; color: #8a99ad; }
-        .stat-box strong { font-size: 11px; color: #00ffcc; }
-
-        .main-grid-container {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 3px;
-            background: #161b26;
-            padding: 6px;
-            border-radius: 8px;
-        }
-        .cell {
-            background: #2c3e50;
-            color: #bdc3c7;
+        .stat-val {
+            font-size: 16px;
             font-weight: bold;
-            font-size: 11px;
-            padding: 6px 0;
-            border-radius: 4px;
+            color: #00ffcc;
+            margin-top: 3px;
         }
-        .cell.cartel-active {
-            background: #2ecc71 !important;
-            color: white !important;
-            box-shadow: 0 0 8px #2ecc71;
-        }
-        .cell.called {
-            background: #d35400 !important;
-            color: white !important;
-        }
-
-        .ticket-section {
-            background: #111622;
-            border: 2px solid #1f293d;
-            border-radius: 12px;
-            padding: 8px;
-            margin-top: 12px;
-        }
-        .cartel-label {
-            background: #f39c12;
-            color: #000;
-            font-weight: bold;
-            font-size: 11px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-        .bingo-header {
+        .grid-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            margin-bottom: 4px;
+            gap: 8px;
+            max-width: 360px;
+            margin: 0 auto;
+            background: #16162a;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #2e2e4f;
         }
-        .letter-box { font-size: 14px; font-weight: bold; padding: 3px 0; border-radius: 4px; color: white; }
-        .b-b { background: #e67e22; } .i-b { background: #2980b9; } .n-b { background: #c0392b; } .g-b { background: #27ae60; } .o-b { background: #8e44ad; }
-        
-        .ticket-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-        .ticket-cell {
-            background: #ffffff;
-            color: #2c3e50;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 8px 0;
-            border-radius: 4px;
-        }
-        .ticket-cell.matched {
-            background: #2ecc71 !important;
-            color: white !important;
-        }
-        .ticket-cell.star { background: #2ecc71; color: white; }
-
-        .status-banner {
-            background: #1b2234;
-            border: 1px solid #f1c40f;
+        .cell {
+            background: #242442;
+            border: 1px solid #3d3d6b;
             border-radius: 6px;
-            padding: 6px;
-            margin: 8px 0;
-            font-size: 13px;
-            color: #f1c40f;
+            padding: 12px 0;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-
-        .footer-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #0b0e14;
-            padding: 10px 0;
+        .cell:active {
+            transform: scale(0.95);
         }
-        .submit-btn {
-            background: #e67e22;
+        .cell.selected {
+            background: #ff6600;
+            border-color: #ff9933;
+            box-shadow: 0 0 10px #ff6600;
+        }
+        .action-btn {
+            background: #4e54c8;
             color: white;
             border: none;
-            width: 90%;
-            padding: 12px 0;
-            font-size: 15px;
-            font-weight: bold;
             border-radius: 8px;
+            padding: 14px;
+            width: 100%;
+            max-width: 360px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.4);
+        }
+        .action-btn:disabled {
+            background: #444455;
+            color: #888899;
+            box-shadow: none;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div class="stat-box"><span>WALLET</span><strong id="wallet-bal">5000 ብር</strong></div>
-        <div class="stat-box"><span>PLAYERS</span><strong id="total-players">0</strong></div>
-        <div class="stat-box"><span>ፈራሽ</span><strong id="ferash-pool">0 ብር</strong></div>
-        <div class="stat-box"><span>ROUND</span><strong id="round-status">-</strong></div>
+    <!-- የላይኛው መረጃ ሰሌዳ -->
+    <div class="header-panel">
+        <div class="stat-box">WALLET<div class="stat-val" id="wallet-val">5000 ብር</div></div>
+        <div class="stat-box">PLAYERS<div class="stat-val" id="players-val">0</div></div>
+        <div class="stat-box">ፈራሽ<div class="stat-val" id="ferash-val">0 ብር</div></div>
+        <div class="stat-box">ROUND<div class="stat-val" id="round-val">#1001</div></div>
     </div>
 
-    <div class="status-banner" id="game-notif">🎰 የካርቴል ቁጥርዎን (1-100) በመንካት ይምረጡ</div>
+    <h3 style="color: #ffcc00; margin: 10px 0;">🎰 የካርቴል ቁጥርዎን ይምረጡ</h3>
 
-    <div class="main-grid-container" id="main-grid"></div>
+    <!-- 1-25 የካርቴል ምርጫ ማውጫ ማሳያ (ልክ እንደ Dil Bingo) -->
+    <div class="grid-container" id="bingo-grid"></div>
 
-    <div class="ticket-section" id="ticket-section" style="display: none;">
-        <div class="cartel-label" id="cartel-number-label">CARTEL #0</div>
-        <div class="bingo-header">
-            <div class="letter-box b-b">B</div><div class="letter-box i-b">I</div><div class="letter-box n-b">N</div><div class="letter-box g-b">G</div><div class="letter-box o-b">O</div>
-        </div>
-        <div class="ticket-grid" id="ticket-grid"></div>
-    </div>
-
-    <div class="footer-container">
-        <button class="submit-btn" id="start-game-btn" disabled style="background:#7f8c8d;">መጀመሪያ የካርቴል ቁጥር ይምረጡ</button>
-    </div>
+    <!-- ማረጋገጫ ቁልፍ -->
+    <button class="action-btn" id="confirm-btn" onclick="submitSelection()" disabled>CONFIRM (እርግጠኛ ነኝ)</button>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // ዌብ አፑን ሙሉ ገጽ ያደርገዋል
 
+        // URL ላይ የመጡ የቦት ዳታዎችን ማንበብ
         const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('wallet-bal').innerText = (urlParams.get('balance') || '5000') + " ብር";
-        document.getElementById('total-players').innerText = urlParams.get('players') || '0';
-        document.getElementById('ferash-pool').innerText = (urlParams.get('ferash') || '0') + " ብር";
-        document.getElementById('round-status').innerText = urlParams.get('status') || 'SuperBingo2026';
+        if(urlParams.get('balance')) document.getElementById('wallet-val').innerText = urlParams.get('balance') + " ብር";
+        if(urlParams.get('players')) document.getElementById('players-val').innerText = urlParams.get('players');
+        if(urlParams.get('ferash')) document.getElementById('ferash-val').innerText = urlParams.get('ferash') + " ብር";
+        if(urlParams.get('game_id')) document.getElementById('round-val').innerText = "#" + urlParams.get('game_id');
 
-        const mainGrid = document.getElementById('main-grid');
-        const mainCells = {};
-        let selectedCartelNum = null;
-        let myTicketNumbers = [];
-        const ticketCellsMap = {};
+        let selectedCartel = null;
+        const grid = document.getElementById('bingo-grid');
 
-        for (let i = 1; i <= 100; i++) {
+        // 25 የካርቴል መምረጫ ቁልፎችን መፍጠር
+        for (let i = 1; i <= 25; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.innerText = i;
-            mainCells[i] = cell;
-
-            cell.addEventListener('click', () => {
-                if (document.getElementById('start-game-btn').innerText.includes("በሂደት")) return;
-                if (selectedCartelNum) mainCells[selectedCartelNum].classList.remove('cartel-active');
-                
-                selectedCartelNum = i;
-                cell.classList.add('cartel-active');
-                
-                document.getElementById('cartel-number-label').innerText = `CARTEL #${i}`;
-                document.getElementById('game-notif').innerText = `🎯 ካርቴል #${i} መርጠዋል! አሁን መጫወት ይችላሉ።`;
-                
-                const startBtn = document.getElementById('start-game-btn');
-                startBtn.disabled = false;
-                startBtn.style.background = '#e67e22';
-                startBtn.innerText = `🎰 ጨዋታውን ጀምር`;
-
-                generateBingoTicketForCartel(i);
-            });
-            mainGrid.appendChild(cell);
+            cell.onclick = () => selectCell(i, cell);
+            grid.appendChild(cell);
         }
 
-        function generateBingoTicketForCartel(cartelNum) {
-            const ticketGrid = document.getElementById('ticket-grid');
-            ticketGrid.innerHTML = ""; 
-            myTicketNumbers = [];
-            const ranges = [{min:1, max:20}, {min:21, max:40}, {min:41, max:60}, {min:61, max:80}, {min:81, max:100}];
+        function selectCell(num, element) {
+            // የድሮውን ምርጫ ማንሳት
+            const activeCell = document.querySelector('.cell.selected');
+            if (activeCell) activeCell.classList.remove('selected');
 
-            for (let row = 0; row < 5; row++) {
-                for (let col = 0; col < 5; col++) {
-                    const tCell = document.createElement('div');
-                    tCell.className = 'ticket-cell';
-                    if (row === 2 && col === 2) {
-                        tCell.innerText = "⭐";
-                        tCell.classList.add('star');
-                    } else {
-                        let range = ranges[col];
-                        let num;
-                        do { num = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min; } while (myTicketNumbers.includes(num));
-                        myTicketNumbers.push(num);
-                        tCell.innerText = num;
-                        ticketCellsMap[num] = tCell;
-                    }
-                    ticketGrid.appendChild(tCell);
-                }
+            // አዲሱን መምረጥ
+            selectedCartel = num;
+            element.classList.add('selected');
+            document.getElementById('confirm-btn').disabled = false;
+        }
+
+        // መረጃውን ወደ ቴሌግራም ቦት መልሶ መላኪያ ዋናው ሲስተም (ልክ እንደ Dil Bingo)
+        function submitSelection() {
+            if (selectedCartel !== null) {
+                const dataToSend = { cartel_num: selectedCartel };
+                tg.sendData(JSON.stringify(dataToSend)); // ዳታውን ወደ Python ቦት ይልካል
+                tg.close(); // ዌብ አፑን በራሱ ይዘጋዋል
             }
-            document.getElementById('ticket-section').style.display = 'block';
         }
-
-        document.getElementById('start-game-btn').addEventListener('click', () => {
-            const startBtn = document.getElementById('start-game-btn');
-            startBtn.disabled = true;
-            startBtn.style.background = '#7f8c8d';
-            startBtn.innerText = "🎰 በመጫወት ላይ...";
-
-            const allBalls = [];
-            for (let i = 1; i <= 100; i++) allBalls.push(i);
-            allBalls.sort(() => Math.random() - 0.5);
-
-            const gameBalls = allBalls.slice(0, 40);
-            let ballIndex = 0;
-            let matchCount = 0;
-
-            const interval = setInterval(() => {
-                if (ballIndex < gameBalls.length) {
-                    let calledBall = gameBalls[ballIndex];
-                    if (mainCells[calledBall] && calledBall !== selectedCartelNum) {
-                        mainCells[calledBall].classList.add('called');
-                    }
-                    if (ticketCellsMap[calledBall]) {
-                        ticketCellsMap[calledBall].classList.add('matched');
-                        matchCount++;
-                    }
-                    let prefix = calledBall <= 20 ? "B-" : calledBall <= 40 ? "I-" : calledBall <= 60 ? "N-" : calledBall <= 80 ? "G-" : "O-";
-                    document.getElementById('game-notif').innerText = `🔴 የወጣው ቁጥር፦ ${prefix}${calledBall} | 🎯 የገጠመዎት፦ ${matchCount}`;
-                    ballIndex++;
-                } else {
-                    clearInterval(interval);
-                    document.getElementById('game-notif').innerText = `🏁 ቢንጎ! በራሱ ተዘግቶ ውጤት ወደ ቦት እየተላከ ነው...`;
-                    
-                    // 🌟 እዚህ ጋር ነው በራሱ አውቶማቲክ እንዲመለስ የተደረገው!
-                    setTimeout(() => {
-                        tg.sendData(JSON.stringify({
-                            cartel_num: selectedCartelNum,
-                            matched_count: matchCount
-                        }));
-                    }, 2000);
-                }
-            }, 600); // ፍጥነቱን በትንሹ ጨመር አድርጌዋለሁ
-        });
     </script>
 </body>
 </html>
