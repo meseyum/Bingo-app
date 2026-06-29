@@ -28,6 +28,7 @@
             border-radius: 6px;
             font-size: 13px;
             font-weight: bold;
+            cursor: pointer;
         }
         .stats-row {
             display: flex;
@@ -72,7 +73,7 @@
             color: #c9c1e6;
             transition: all 0.3s ease;
         }
-        /* እውነተኛው ጨዋታ ሲጀምር የሚበሩት ቀይ ቁጥሮች */
+        /* የወጡ ቁጥሮች ቀይ/ብርቱካንማ የሚሆኑበት ውብ ማሳያ */
         .num-cell.called {
             background: #d84b16 !important;
             color: #ffffff !important;
@@ -94,6 +95,7 @@
             text-align: center;
             color: #897fa6;
             font-size: 11px;
+            flex: 1;
         }
         .menu-item.active { color: #00ffcc; }
     </style>
@@ -109,7 +111,7 @@
         <div class="stat-box"><span>Main Wallet</span><div id="main-wallet">2500</div></div>
         <div class="stat-box"><span>Play Wallet</span><div>0</div></div>
         <div class="stat-box"><span>Stake</span><div>10</div></div>
-        <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">-- s</div></div>
+        <div class="stat-box"><span>Time Left</span><div id="timer" class="timer-highlight">35 s</div></div>
     </div>
 
     <!-- 1-88 የቁጥር ሰሌዳ -->
@@ -127,41 +129,57 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ሰሌዳውን መፍጠር
+        // 1. 1-88 ቁጥሮችን በሰሌዳው ላይ መደርደር (ይህ አሁን በጭራሽ አይጠፋም!)
         const board = document.getElementById('bingo-board');
-        for (let i = 1; i <= 88; i++) {
-            board.innerHTML += `<div class="num-cell" id="cell-${i}">${i}</div>`;
-        }
-
-        // 🔄 ዋናው ማጫወቻ ሲስተም፡ በየ 2 ሴኮንዱ ከፓይተን ቦቱ ላይ የቀጥታ መረጃ በራሱ ይጎትታል (ያለ ማደስ)
-        async def fetchLiveGameStatus() {
-            try {
-                // ይህ የምታየው ፖርት (localhost:8080) ከፓይተን ቦትህ ጋር በቀጥታ ይገናኛል
-                const response = await fetch('http://localhost:8080/status');
-                const data = await response.json();
-                
-                // 1. የሰከንድ ቆጣሪውን በራሱ ማደስ
-                document.getElementById('timer').innerText = data.time_left + " s";
-                document.getElementById('main-wallet').innerText = data.wallet;
-
-                // 2. ሁሉንም ቁጥሮች መጀመሪያ ማጽዳት
-                for (let i = 1; i <= 88; i++) {
-                    document.getElementById(`cell-${i}`).classList.remove('called');
-                }
-
-                // 3. አዳዲስ የወጡትን ቁጥሮች በራሱ ጊዜ ቀይ ማድረግ (ማጫወት)
-                data.called_balls.forEach(ball => {
-                    const cell = document.getElementById(`cell-${ball}`);
-                    if (cell) cell.classList.add('called');
-                });
-
-            } catch (error) {
-                console.log("የቀጥታ ግንኙነት በመጠባበቅ ላይ...");
+        function buildBoard() {
+            board.innerHTML = "";
+            for (let i = 1; i <= 88; i++) {
+                board.innerHTML += `<div class="num-cell" id="cell-${i}">${i}</div>`;
             }
         }
+        buildBoard();
 
-        // በየ 2 ሰከንድ (2000ms) በራሱ አዲስ መረጃ እንዲያመጣ ማዘዝ
-        setInterval(fetchLiveGameStatus, 2000);
+        // 2. 🎰 አውቶማቲክ የጨዋታ ማጫወቻ ህግ (የራሱ የሆነ የውስጥ ሞተር)
+        let timeLeft = 35;
+        let calledNumbers = [];
+        
+        // 1-88 ቁጥሮችን አደባልቆ ዝግጁ ማድረግ
+        let availableNumbers = Array.from({length: 88}, (_, i) => i + 1);
+        
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        shuffle(availableNumbers);
+
+        // በየሰከንዱ የሚቆጥረውና ቁጥሮቹን ቀይ የሚያደርገው ዋናው ሲስተም
+        const gameInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').innerText = timeLeft + " s";
+
+            // በየ 1.5 ሰከንዱ አንድ አዲስ ቁጥር በራሱ እያወጣ ቀይ ያደርጋል
+            if (timeLeft > 5 && timeLeft % 2 === 0 && availableNumbers.length > 0) {
+                let nextBall = availableNumbers.pop();
+                calledNumbers.push(nextBall);
+                
+                // በገጹ ላይ ቁጥሩን ፈልጎ ቀይ ማድረግ
+                const cell = document.getElementById(`cell-${nextBall}`);
+                if (cell) {
+                    cell.classList.add('called');
+                }
+            }
+
+            // ቆጣሪው 0 ሲደርስ ጨዋታውን አጽድቶ አዲስ ዙር በራሱ ይጀምራል
+            if (timeLeft <= 0) {
+                timeLeft = 35; // ወደ 35 ይመለሳል
+                calledNumbers = [];
+                availableNumbers = Array.from({length: 88}, (_, i) => i + 1);
+                shuffle(availableNumbers);
+                buildBoard(); // ሰሌዳውን መልሶ ማጽዳት
+            }
+        }, 1000);
     </script>
 </body>
 </html>
