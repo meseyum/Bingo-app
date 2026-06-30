@@ -217,7 +217,7 @@
         <div class="wallet-card">
             <div class="section-title">💸 ብር ማውጫ (Withdraw)</div>
             <div class="input-group">
-                <label>የባንክ ስም (ምሳሌ፦ ንግድ ባንክ፣ አቢሲኒያ...)</label>
+                <label>የባንክ ስም</label>
                 <input type="text" id="withdraw-bank" class="input-field" placeholder="የባንክ ስም ያስገቡ">
             </div>
             <div class="input-group">
@@ -237,7 +237,7 @@
             <div style="font-size: 50px; margin-bottom: 15px;">👥</div>
             <div class="section-title" style="justify-content: center;">የሪፈራል ፕሮግራም</div>
             <p style="color: #a5a1d4; font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
-                ጓደኞችዎን ይጋብዙ እና ለእያንዳንዱ በተሳካ ሁኔታ ለሚመዘገብ ሰው <b>የ 5.00 ብር ስጦታ</b> በዋና ሂሳብዎ ላይ ያግኙ!
+                ጓደኞችዎን ይጋብዙ እና ለእያንዳንዱ በተሳካ ሁኔታ ለሚመዘገብ ሰው <b>የ 5.00 ብር ስጦታ</b> ያግኙ!
             </p>
             <button class="action-btn" style="background: linear-gradient(135deg, #00b4db, #00ffaa); color:#131129;" onclick="sendWalletAction('referral')">🔗 የጋበዣ ሊንክ ማግኛ</button>
         </div>
@@ -256,33 +256,30 @@
         tg.ready();
         tg.expand();
 
-        // 1. ከፓይተን የመጣውን ተጫዋች ብር ማንበብ
         const urlParams = new URLSearchParams(window.location.search);
         const userBalance = urlParams.get('balance') || '100.00';
         document.getElementById('balance-display').innerText = parseFloat(userBalance).toFixed(2) + " ብር";
 
         let finalChoices = [];
 
-        // 2. የታችኛውን ማውጫ መቀያየሪያ ፈንክሽን
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
             document.getElementById(tabId).classList.add('active');
             element.classList.add('active');
         }
 
-        // 3. የ 1 እስከ 70 ቁጥሮች ሰሌዳ መፍጠር
+        // ከ 1 እስከ 70 ቁጥሮች ሰሌዳ መፍጠር
         const board = document.getElementById('numbers-board');
         for (let i = 1; i <= 70; i++) {
             const btn = document.createElement('button');
             btn.className = 'num-btn';
+            btn.id = 'num-' + i;
             btn.innerText = i;
             btn.onclick = () => selectAndAutoFill(i);
             board.appendChild(btn);
         }
 
-        // 4. ባዶ 5x5 ማትሪክስ መጀመሪያ ማሳያ
         const matrixContainer = document.getElementById('bingo-matrix');
         function initMatrix() {
             matrixContainer.innerHTML = '';
@@ -300,30 +297,26 @@
         }
         initMatrix();
 
-        // 5. ዋናው 1 ሲነካ 23ቱን በረንደም ኦቶማቲክ መሙያ ሎጂክ
+        // ዋናው 1 ሲነካ 23ቱን በኦቶማቲክ መሙያ ሎጂክ
         function selectAndAutoFill(selectedNum) {
             document.querySelectorAll('.num-btn').forEach(b => b.className = 'num-btn');
             
             finalChoices = [];
             finalChoices.push(selectedNum);
             
-            const allButtons = document.querySelectorAll('.num-btn');
-            allButtons[selectedNum - 1].classList.add('selected');
+            document.getElementById('num-' + selectedNum).classList.add('selected');
 
-            // የቀሩትን 23 ቁጥሮች በዘፈቀደ መሙላት
             while (finalChoices.length < 24) {
                 let rand = Math.floor(Math.random() * 70) + 1;
                 if (!finalChoices.includes(rand)) {
                     finalChoices.push(rand);
-                    allButtons[rand - 1].classList.add('auto-filled');
+                    document.getElementById('num-' + rand).classList.add('auto-filled');
                 }
             }
 
-            // ማትሪክስ ሰሌዳውን መሙላት
             renderMatrix(finalChoices);
             document.getElementById('cartel-count').innerText = "(24/24)";
 
-            // የመጫወቻ ቁልፉን ማብራት
             const playBtn = document.getElementById('main-play-btn');
             playBtn.disabled = false;
             playBtn.innerText = "በ 10 ብር ይጫወቱ 🎰";
@@ -331,7 +324,6 @@
             playBtn.style.color = '#131129';
         }
 
-        // 6. ማትሪክሱን 5x5 ላይ መደርደር
         function renderMatrix(numbers) {
             matrixContainer.innerHTML = '';
             let numIndex = 0;
@@ -349,7 +341,6 @@
             }
         }
 
-        // 7. ጨዋታ መጀመርያ ቁልፍ ሲጫን ለቦቱ መላክ
         document.getElementById('main-play-btn').onclick = function() {
             if (finalChoices.length === 24) {
                 const data = {
@@ -362,7 +353,6 @@
             }
         };
 
-        // 8. የዋሌት እና የሪፈራል መረጃዎችን ለቦቱ ማስተላለፊያ
         function sendWalletAction(type) {
             let data = { action: type };
             if (type === 'deposit') {
