@@ -3,312 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperBingo 2026 - 5x5 Matrix Edition</title>
+    <title>SuperBingo 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * { box-sizing: border-box; }
         body {
-            background-color: #120e24;
+            background-color: #131129;
             color: #ffffff;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 10px;
-            padding-bottom: 80px;
+            text-align: center;
+            -webkit-user-select: none;
             user-select: none;
         }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
         
         /* የላይኛው መረጃ ሰሌዳ */
-        .status-header {
+        .header {
             display: flex;
-            justify-content: space-between;
-            background: #1a1535;
+            justify-content: space-around;
+            background: #1e1b4b;
             padding: 12px;
             border-radius: 10px;
             margin-bottom: 12px;
             font-size: 13px;
-            border: 1px solid #2b2354;
         }
-        .status-header span { color: #8a81b3; font-size: 11px; display: block; }
+        .balance-txt { color: #00ffcc; font-weight: bold; font-size: 15px; }
+        .status-txt { color: #ff3366; font-weight: bold; }
+        
+        .instruction {
+            color: #00ffcc;
+            font-size: 13px;
+            margin: 10px 0;
+            background: rgba(0, 255, 204, 0.08);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #00ffcc;
+        }
 
-        /* 1-100 ዋናው ቁጥር መምረጫ ሰሌዳ */
-        .grid-100 {
+        /* የገጾች መቆጣጠሪያ (Tabs) */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* --- 1. የጨዋታ ገጽ ስታይል --- */
+        .numbers-grid {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 4px;
-            background: #1a1535;
-            padding: 8px;
+            gap: 5px;
+            background: #1a1636;
+            padding: 10px;
             border-radius: 10px;
-            margin-bottom: 12px;
-            max-height: 220px;
-            overflow-y: auto;
+            margin-bottom: 15px;
         }
-        .cell {
-            background: #251f47;
-            font-size: 11px;
+        .num-btn {
+            background: #25214d;
+            border: 1px solid #3b3675;
+            color: #a5a1d4;
+            padding: 10px 0;
+            font-size: 13px;
             font-weight: bold;
-            padding: 8px 0;
-            text-align: center;
-            border-radius: 4px;
-            color: #a299cc;
+            border-radius: 6px;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .cell.selected-by-user { background: #00ffcc !important; color: #120e24 !important; font-weight: bold; }
-        .cell.called { background: #d84b16 !important; color: #fff; }
-        .cell.last { background: #ffcc00 !important; color: #120e24; box-shadow: 0 0 8px #ffcc00; }
+        .num-btn.selected { background: #00ffaa; color: #131129; border-color: #00ffaa; }
+        .num-btn.auto-filled { background: #ff6600; color: #ffffff; border-color: #ff6600; }
 
-        /* 🎰 የ 5x5 የቢንጎ ማትሪክስ ዳሽቦርድ (Cartel Dashboard) */
-        .matrix-container {
-            background: #1e183c;
+        .cartel-section {
+            background: #1a1636;
             padding: 15px;
-            border-radius: 14px;
-            border: 2px solid #362c6b;
-            margin-top: 10px;
+            border-radius: 12px;
+            border: 1px solid #2e295e;
+        }
+        .cartel-title {
+            text-align: left;
+            font-size: 15px;
+            color: #ffcc00;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .matrix-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-top: 10px;
+            gap: 6px;
         }
         .matrix-cell {
-            background: #ffffff;
-            color: #120e24;
+            background: #25214d;
+            border: 2px dashed #47418c;
+            border-radius: 8px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 18px;
             font-weight: bold;
-            padding: 15px 0;
-            text-align: center;
+            color: #ffffff;
+        }
+        .matrix-cell.filled { background: #ffffff; color: #131129; border-style: solid; border-color: #ffffff; }
+        .matrix-cell.center-star { background: #ffcc00; color: #131129; font-size: 22px; border-style: solid; border-color: #ffcc00; }
+
+        .play-btn {
+            background: #47418c;
+            color: #7975a8;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
             border-radius: 8px;
-            box-shadow: inset 0 -3px 0 #ddd;
-            transition: all 0.2s ease;
+            margin-top: 15px;
+            cursor: pointer;
         }
-        .matrix-cell.star { background: #ffcc00 !important; color: #120e24; box-shadow: inset 0 -3px 0 #ccaa00; }
-        .matrix-cell.match { background: #20c997 !important; color: #fff !important; box-shadow: inset 0 -3px 0 #179b71 !important; transform: scale(0.95); }
-        .matrix-cell.empty { background: #251f47; color: #4e4475; border: 2px dashed #362c6b; box-shadow: none; }
 
-        /* አዝራሮች */
-        .btn {
-            background: #d84b16; color: white; border: none; padding: 14px;
-            width: 100%; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px;
+        /* --- 2. የዋሌት ገጽ ስታይል --- */
+        .wallet-card {
+            background: #1a1636;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: left;
         }
-        .btn-sec { background: #251f47; color: #00ffcc; border: 1px solid #00ffcc; }
+        .section-title { font-size: 16px; color: #ffcc00; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #a5a1d4; margin-bottom: 5px; }
         .input-field {
-            width: 100%; padding: 12px; background: #1a1535; border: 1px solid #362c6b;
-            border-radius: 8px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 14px;
+            width: 100%;
+            background: #25214d;
+            border: 1px solid #3b3675;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
         }
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .deposit-btn { background: #ff5500; color: white; }
+        .withdraw-btn { background: #00cc88; color: #131129; }
 
-        /* የታችኛው ማውጫ */
+        /* --- የታችኛው ማውጫ (Footer) --- */
         .footer-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; background: #0d0a1a;
-            display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid #1a1535;
+            display: flex;
+            justify-content: space-around;
+            background: #1a1636;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 0;
+            border-top: 1px solid #2e295e;
+            z-index: 1000;
         }
-        .nav-item { text-align: center; color: #726999; font-size: 11px; flex: 1; cursor: pointer; }
-        .nav-item.active { color: #00ffcc; }
+        .nav-item {
+            color: #7975a8;
+            font-size: 12px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 33%;
+        }
+        .nav-item.active { color: #00ffaa; }
     </style>
 </head>
 <body>
 
-    <!-- 1. የጨዋታ ገጽ -->
-    <div id="game-tab" class="tab-content active">
-        <div class="status-header">
-            <div><span>ዋና ሂሳብ</span><div id="status-bal" style="color:#20c997;">0.00 ብር</div></div>
-            <div><span>ቀሪ ሰከንድ</span><div id="status-timer" style="color:#ffcc00;">20 s</div></div>
-            <div><span>ሁኔታ</span><div id="status-text">እረፍት (ቁጥር ይምረጡ)</div></div>
-        </div>
+    <div class="header">
+        <div>ዋና ሂሳብ<br><span id="balance-display" class="balance-txt">100.00 ብር</span></div>
+        <div>ቀሪ ሰከንድ<br><span style="color:#ffcc00; font-weight: bold;">30 s</span></div>
+        <div>ሁኔታ<br><span class="status-txt">🔴 የቀጥታ ጨዋታ!</span></div>
+    </div>
 
-        <div style="font-size: 12px; color: #00ffcc; margin-bottom: 8px; text-align: center; font-weight: bold;" id="select-info">
-            💡 እባክዎ ከታች ካለው ሰሌዳ 24 ቁጥሮችን በመንካት የ 5x5 ማትሪክስዎን ይሙሉ!
+    <div id="game-tab" class="tab-content active">
+        <div class="instruction">
+            💡 እባክዎ ከታች ካለው ሰሌዳ <b>1 ቁጥር ብቻ</b> ይምረጡ፤ የቀሩትን 23 ቁጥሮች ሲስተሙ ራሱ በኦቶማቲክ ሞልቶ 5x5 ማትሪክስ ይሰጥዎታል!
         </div>
         
-        <!-- 1-100 ዋናው ምርጫ ሰሌዳ -->
-        <div class="grid-100" id="bingo-board"></div>
+        <div class="numbers-grid" id="numbers-board"></div>
 
-        <!-- 🎰 የ 5x5 የካርቴላ ዳሽቦርድ (Dashboard) -->
-        <div class="matrix-container">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight: bold; color: #ffcc00; font-size: 14px;" id="matrix-title">የእርስዎ ማትሪክስ ሰሌዳ (0/24)</span>
-                <button class="btn btn-sec" style="width:auto; padding:8px 16px; margin:0;" id="buy-btn" onclick="lockAndPlay()">በ 10 ብር ይጫወቱ 🎰</button>
+        <div class="cartel-section">
+            <div class="cartel-title">
+                <span>የአሁኑ ማትሪክስ ሰሌዳ</span>
+                <span id="cartel-count" style="font-size:12px; color:#a5a1d4;">(0/24)</span>
             </div>
-            <div class="matrix-grid" id="matrix-grid-view"></div>
+            <div class="matrix-grid" id="bingo-matrix"></div>
         </div>
+
+        <button id="main-play-btn" class="play-btn" disabled>መጀመሪያ ቁጥር ይምረጡ 🎰</button>
     </div>
 
-    <!-- 2. የዋሌት ገጽ -->
     <div id="wallet-tab" class="tab-content">
-        <h3>💰 የኪስ ቦርሳ (Wallet)</h3>
-        <div class="status-header" style="margin-bottom:20px;">
-            <div><span>አጠቃላይ ቀሪ ሂሳብ</span><div id="wallet-bal-display" style="font-size:18px; color:#20c997;">0.00 ብር</div></div>
+        <div class="wallet-card">
+            <div class="section-title">📥 ብር መሙያ (Deposit)</div>
+            <div class="input-group">
+                <label>የሚሞላው የብር መጠን</label>
+                <input type="number" id="deposit-amount" class="input-field" placeholder="ምሳሌ: 100">
+            </div>
+            <button class="action-btn deposit-btn" onclick="sendWalletAction('deposit')">በቴሌብር/በባንክ ይሙሉ</button>
         </div>
-        <h4>📥 ብር መሙያ (Deposit)</h4>
-        <input type="number" id="dep-amount" class="input-field" placeholder="የሚሞላው ብር መጠን">
-        <button class="btn" onclick="processWallet('deposit')">በቴሌብር/ባንክ ይሙሉ</button>
+
+        <div class="wallet-card">
+            <div class="section-title">💸 ብር ማውጫ (Withdraw)</div>
+            <div class="input-group">
+                <label>የባንክ ስም (ምሳሌ፦ ንግድ ባንክ፣ አቢሲኒያ...)</label>
+                <input type="text" id="withdraw-bank" class="input-field" placeholder="የባንክ ስም ያስገቡ">
+            </div>
+            <div class="input-group">
+                <label>የአካውንት ቁጥር</label>
+                <input type="text" id="withdraw-account" class="input-field" placeholder="የሂሳብ ቁጥር ያስገቡ">
+            </div>
+            <div class="input-group">
+                <label>የሚወጣው የብር መጠን</label>
+                <input type="number" id="withdraw-amount" class="input-field" placeholder="ምሳሌ: 500">
+            </div>
+            <button class="action-btn withdraw-btn" onclick="sendWalletAction('withdraw')">ፎርሙን ለቦቱ ላክ</button>
+        </div>
     </div>
 
-    <!-- 3. የሪፈራል ገጽ -->
-    <div id="ref-tab" class="tab-content">
-        <h3>👥 ጓደኛ ይጋብዙ</h3>
-        <input type="text" id="ref-link-input" class="input-field" readonly>
-        <button class="btn btn-sec" onclick="copyRef()">ሊንኩን ኮፒ አድርግ</button>
+    <div id="referral-tab" class="tab-content">
+        <div class="wallet-card" style="text-align: center; padding: 30px 20px;">
+            <div style="font-size: 50px; margin-bottom: 15px;">👥</div>
+            <div class="section-title" style="justify-content: center;">የሪፈራል ፕሮግራም</div>
+            <p style="color: #a5a1d4; font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
+                ጓደኞችዎን ይጋብዙ እና ለእያንዳንዱ በተሳካ ሁኔታ ለሚመዘገብ ሰው <b>የ 5.00 ብር ስጦታ</b> በዋና ሂሳብዎ ላይ ያግኙ!
+            </p>
+            <button class="action-btn" style="background: linear-gradient(135deg, #00b4db, #00ffaa); color:#131129;" onclick="sendWalletAction('referral')">🔗 የጋበዣ ሊንክ ማግኛ</button>
+        </div>
     </div>
+
+    <div style="height: 70px;"></div>
 
     <div class="footer-nav">
-        <div class="nav-item active" id="nav-game" onclick="switchTab('game')">🎮<br>ጨዋታ</div>
-        <div class="nav-item" id="nav-wallet" onclick="switchTab('wallet')">💼<br>ዋሌት</div>
-        <div class="nav-item" id="nav-ref" onclick="switchTab('ref')">👥<br>ሪፈራል</div>
+        <button class="nav-item active" onclick="switchTab('game-tab', this)"><span>🎮</span><span>ጨዋታ</span></button>
+        <button class="nav-item" onclick="switchTab('wallet-tab', this)"><span>💼</span><span>ዋሌት</span></button>
+        <button class="nav-item" onclick="switchTab('referral-tab', this)"><span>👥</span><span>ሪፈራል</span></button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
+        // 1. ከፓይተን የመጣውን ተጫዋች ብር ማንበብ
         const urlParams = new URLSearchParams(window.location.search);
-        let userBalance = parseFloat(urlParams.get('balance')) || 100.00;
-        const user = tg.initDataUnsafe.user || { id: 12345 };
+        const userBalance = urlParams.get('balance') || '100.00';
+        document.getElementById('balance-display').innerText = parseFloat(userBalance).toFixed(2) + " ብር";
 
-        let selectedNumbers = []; 
-        let hasCartel = false;
-        let isPlaying = false;
-        let timeLeft = 20;
-        let pool = Array.from({length: 100}, (_, i) => i + 1);
+        let finalChoices = [];
 
-        function updateBalanceUI() {
-            document.getElementById('status-bal').innerText = userBalance.toFixed(2) + " ብር";
-            document.getElementById('wallet-bal-display').innerText = userBalance.toFixed(2) + " ብር";
+        // 2. የታችኛውን ማውጫ መቀያየሪያ ፈንክሽን
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
         }
-        updateBalanceUI();
 
-        // 1-100 ሰሌዳ መፍጠር
-        const board = document.getElementById('bingo-board');
-        function initBoard() {
-            board.innerHTML = "";
-            for (let i = 1; i <= 100; i++) {
-                board.innerHTML += `<div class="cell" id="b-${i}" onclick="selectNumber(${i})">${i}</div>`;
-            }
+        // 3. የ 1 እስከ 70 ቁጥሮች ሰሌዳ መፍጠር
+        const board = document.getElementById('numbers-board');
+        for (let i = 1; i <= 70; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'num-btn';
+            btn.innerText = i;
+            btn.onclick = () => selectAndAutoFill(i);
+            board.appendChild(btn);
         }
-        initBoard();
 
-        // የ 5x5 ማትሪክስ ዳሽቦርድ መሳያ (Dynamic 5x5 Matrix)
-        function updateMatrixDashboard() {
-            const grid = document.getElementById('matrix-grid-view');
-            grid.innerHTML = "";
-            let numIdx = 0;
-
+        // 4. ባዶ 5x5 ማትሪክስ መጀመሪያ ማሳያ
+        const matrixContainer = document.getElementById('bingo-matrix');
+        function initMatrix() {
+            matrixContainer.innerHTML = '';
             for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
                 if (i === 12) {
-                    // መሃል ላይ ያለችው ነፃ ስጦታ (⭐ Free Star)
-                    grid.innerHTML += `<div class="matrix-cell star">⭐</div>`;
+                    cell.className = 'matrix-cell center-star';
+                    cell.innerText = '⭐';
                 } else {
-                    let currentNum = selectedNumbers[numIdx] || "";
-                    if (currentNum !== "") {
-                        grid.innerHTML += `<div class="matrix-cell" id="c-${currentNum}">${currentNum}</div>`;
-                        numIdx++;
-                    } else {
-                        grid.innerHTML += `<div class="matrix-cell empty">?</div>`;
-                    }
+                    cell.className = 'matrix-cell';
+                    cell.innerText = '?';
+                }
+                matrixContainer.appendChild(cell);
+            }
+        }
+        initMatrix();
+
+        // 5. ዋናው 1 ሲነካ 23ቱን በረንደም ኦቶማቲክ መሙያ ሎጂክ
+        function selectAndAutoFill(selectedNum) {
+            document.querySelectorAll('.num-btn').forEach(b => b.className = 'num-btn');
+            
+            finalChoices = [];
+            finalChoices.push(selectedNum);
+            
+            const allButtons = document.querySelectorAll('.num-btn');
+            allButtons[selectedNum - 1].classList.add('selected');
+
+            // የቀሩትን 23 ቁጥሮች በዘፈቀደ መሙላት
+            while (finalChoices.length < 24) {
+                let rand = Math.floor(Math.random() * 70) + 1;
+                if (!finalChoices.includes(rand)) {
+                    finalChoices.push(rand);
+                    allButtons[rand - 1].classList.add('auto-filled');
                 }
             }
-            document.getElementById('matrix-title').innerText = `የማትሪክስ ሰሌዳ (${selectedNumbers.length}/24)`;
-        }
-        updateMatrixDashboard();
 
-        // 👆 ተጫዋቹ ቁጥር ሲመርጥ ወደ 5x5 ዳሽቦርድ የሚጨምርበት ህግ
-        window.selectNumber = function(num) {
-            if (isPlaying || hasCartel) return;
+            // ማትሪክስ ሰሌዳውን መሙላት
+            renderMatrix(finalChoices);
+            document.getElementById('cartel-count').innerText = "(24/24)";
 
-            const cell = document.getElementById(`b-${num}`);
-            if (selectedNumbers.includes(num)) {
-                // ከተመረጠው ላይ መቀነስ
-                selectedNumbers = selectedNumbers.filter(n => n !== num);
-                cell.classList.remove('selected-by-user');
-            } else {
-                // እስከ 24 ቁጥር መሙላት
-                if (selectedNumbers.length >= 24) {
-                    alert("❌ መምረጥ የሚችሉት 24 ቁጥሮችን ብቻ ነው!");
-                    return;
-                }
-                selectedNumbers.push(num);
-                cell.classList.add('selected-by-user');
-            }
-            tg.HapticFeedback.impactOccurred('light');
-            updateMatrixDashboard();
+            // የመጫወቻ ቁልፉን ማብራት
+            const playBtn = document.getElementById('main-play-btn');
+            playBtn.disabled = false;
+            playBtn.innerText = "በ 10 ብር ይጫወቱ 🎰";
+            playBtn.style.background = 'linear-gradient(135deg, #00b4db, #00ffaa)';
+            playBtn.style.color = '#131129';
         }
 
-        // 🎰 የ 10 ብር መቁረጫ እና ማትሪክስ መቆለፊያ ቁልፍ
-        function lockAndPlay() {
-            if (selectedNumbers.length < 24) {
-                alert("❌ እባክዎ መጀመሪያ 24 ቁጥሮችን መርጠው የ 5x5 ማትሪክስዎን ይሙሉ!");
-                return;
-            }
-            if (userBalance < 10) {
-                alert("❌ ይቅርታ፣ ለመጫወት በቂ ሂሳብ የሎትም። እባክዎ መጀመሪያ ዋሌት ውስጥ ይሙሉ!");
-                return;
-            }
-            if (hasCartel) return;
-
-            userBalance -= 10;
-            updateBalanceUI();
-            hasCartel = true;
-
-            document.getElementById('buy-btn').innerText = "✅ ማትሪክስ ተቆልፏል";
-            document.getElementById('buy-btn').style.color = "#20c997";
-            document.getElementById('select-info').innerText = "🔒 የእርስዎ 5x5 ማትሪክስ ተቆልፏል! የዕጣ ቁጥሮችን ይጠብቁ።";
-
-            // መረጃውን ወደ ፓይተን መላክ
-            tg.sendData(JSON.stringify({ action: "buy_cartel", user_id: user.id, cost: 10, choices: selectedNumbers }));
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tab + '-tab').classList.add('active');
-            document.getElementById('nav-' + tab).classList.add('active');
-        }
-
-        // ⏱️ የጨዋታ ጊዜ ቆጣሪ ሞተር (Real-time Game Loop)
-        setInterval(() => {
-            timeLeft--;
-            document.getElementById('status-timer').innerText = timeLeft + " s";
-
-            if (timeLeft <= 0) {
-                if (!isPlaying) {
-                    isPlaying = true;
-                    timeLeft = 40; // የዕጣ ማውጫ ሰዓት
-                    document.getElementById('status-text').innerText = "🔴 የቀጥታ ጨዋታ!";
+        // 6. ማትሪክሱን 5x5 ላይ መደርደር
+        function renderMatrix(numbers) {
+            matrixContainer.innerHTML = '';
+            let numIndex = 0;
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                if (i === 12) {
+                    cell.className = 'matrix-cell center-star';
+                    cell.innerText = '⭐';
                 } else {
-                    isPlaying = false;
-                    timeLeft = 20; // አዲስ እረፍት እና ቁጥር መምረጫ ሰዓት
-                    document.getElementById('status-text').innerText = "እረፍት (ቁጥር ይምረጡ)";
-                    hasCartel = false;
-                    selectedNumbers = [];
-                    document.getElementById('buy-btn').innerText = "በ 10 ብር ይጫወቱ 🎰";
-                    document.getElementById('buy-btn').style.color = "#00ffcc";
-                    document.getElementById('select-info').innerText = "💡 እባክዎ ከታች ካለው ሰሌዳ 24 ቁጥሮችን በመንካት የ 5x5 ማትሪክስዎን ይሙሉ!";
-                    initBoard();
-                    updateMatrixDashboard();
-                    pool = Array.from({length: 100}, (_, i) => i + 1);
+                    cell.className = 'matrix-cell filled';
+                    cell.innerText = numbers[numIndex];
+                    numIndex++;
                 }
+                matrixContainer.appendChild(cell);
             }
+        }
 
-            // 🎲 በየ 2 ሰከንዱ እጣ ማውጣት እና በ 5x5 ዳሽቦርድ ላይ ማመሳከር
-            if (isPlaying && timeLeft > 2 && timeLeft % 2 === 0 && pool.length > 0) {
-                let ballIdx = Math.floor(Math.random() * pool.length);
-                let ball = pool[ballIdx];
-                pool.splice(ballIdx, 1);
-
-                document.querySelectorAll('.cell').forEach(c => c.classList.remove('last'));
-                
-                // 1-100 ቦርዱ ላይ ማሳየት
-                let bCell = document.getElementById(`b-${ball}`);
-                if (bCell) bCell.classList.add('called', 'last');
-
-                // 🎰 በ 5x5 ማትሪክስ ዳሽቦርዱ ላይ ከተገኘ ማመሳሰል (Match ማድረግ)
-                let cCell = document.getElementById(`c-${ball}`);
-                if (cCell) {
-                    cCell.classList.add('match');
-                    tg.HapticFeedback.impactOccurred('medium');
-                }
+        // 7. ጨዋታ መጀመርያ ቁልፍ ሲጫን ለቦቱ መላክ
+        document.getElementById('main-play-btn').onclick = function() {
+            if (finalChoices.length === 24) {
+                const data = {
+                    action: "buy_cartel",
+                    cost: 10,
+                    choices: finalChoices
+                };
+                tg.sendData(JSON.stringify(data));
+                tg.close();
             }
-        }, 1000);
+        };
+
+        // 8. የዋሌት እና የሪፈራል መረጃዎችን ለቦቱ ማስተላለፊያ
+        function sendWalletAction(type) {
+            let data = { action: type };
+            if (type === 'deposit') {
+                const amt = document.getElementById('deposit-amount').value;
+                if(!amt) { alert('እባክዎ መጀመሪያ የብር መጠን ያስገቡ!'); return; }
+                data.amount = amt;
+            } else if (type === 'withdraw') {
+                const bank = document.getElementById('withdraw-bank').value;
+                const acc = document.getElementById('withdraw-account').value;
+                const amt = document.getElementById('withdraw-amount').value;
+                if(!bank || !acc || !amt) { alert('እባክዎ ሁሉንም ክፍት ቦታዎች ይሙሉ!'); return; }
+                data.bank = bank;
+                data.account = acc;
+                data.amount = amt;
+            }
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
     </script>
 </body>
 </html>
