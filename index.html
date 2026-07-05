@@ -6,229 +6,213 @@
     <title>SuperBingo2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #0f0c24;
-            color: #ffffff;
+            background-color: #171131; color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 10px; text-align: center;
-            -webkit-user-select: none; user-select: none;
+            padding: 10px; -webkit-user-select: none; user-select: none;
         }
-        
-        /* 📊 መረጃ ሰሌዳ (Dashboard) */
-        .header-stats {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 15px;
+
+        /* 📊 የላይኛው መረጃ ሰሌዳ */
+        .top-stats {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 15px;
         }
         .stat-box {
-            background: #17143a; padding: 10px 4px; border-radius: 10px; font-size: 11px; color: #a5a1d4;
-            border: 1px solid #252152;
+            background: #251c4a; border-radius: 8px; padding: 6px 2px; text-align: center;
+            font-size: 10px; color: #a5a1d4; font-weight: bold;
         }
-        .stat-val { display: block; font-size: 14px; font-weight: bold; margin-top: 4px; }
-        .val-main { color: #00ffcc; }
-        .val-play { color: #ffcc00; }
-        .val-stake { color: #ffffff; }
-        .val-timer { color: #ff3366; }
+        .stat-box span { display: block; font-size: 13px; color: #ffffff; margin-top: 2px; }
 
-        /* 🔢 የቁጥሮች ሰሌዳ (1-70) */
-        .numbers-grid {
-            display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px;
-            background: #151233; padding: 12px; border-radius: 12px; margin-bottom: 15px;
-            border: 1px solid #252152;
-        }
-        .num-btn {
-            background: #1e1a44; border: 1px solid #2d2866; color: #7f7ba8;
-            padding: 11px 0; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        /* 🏆 ዋናው አቀማመጥ (በግራ ቁጥሮች፣ በቀኝ የቀጥታ ውጤት) */
+        .main-container { display: flex; gap: 10px; margin-bottom: 15px; }
         
-        /* 🔥 ተጫዋቹ የነካው ቁጥር ብቻ የሚበራበት (Neon Green) */
-        .num-btn.user-picked { 
-            background: #00ffaa !important; 
-            color: #0f0c24 !important; 
-            border-color: #00ffaa !important;
-            box-shadow: 0 0 10px #00ffaa;
+        /* 🔢 የቢንጎ ቁጥሮች ሰሌዳ (1-75) */
+        .bingo-board {
+            width: 55%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+            background: #1e163d; padding: 6px; border-radius: 10px;
         }
+        .letter-header {
+            text-align: center; font-weight: bold; font-size: 14px; padding: 5px 0; border-radius: 5px;
+        }
+        .b-lbl { background: #007bff; } .i-lbl { background: #6f42c1; } 
+        .n-lbl { background: #e83e8c; } .g-lbl { background: #28a745; } .o-lbl { background: #fd7e14; }
+
+        .num-cell {
+            background: #2d235c; color: #a5a1d4; text-align: center; padding: 8px 0;
+            font-size: 11px; font-weight: bold; border-radius: 6px; transition: all 0.2s;
+        }
+        /* 🔥 የወጡ ቁጥሮች ማብሪያ ከለር */
+        .num-cell.called { background: #fd7e14 !important; color: #ffffff !important; }
+
+        /* 📺 የቀኝ መረጃ ሰሌዳ */
+        .live-side { width: 45%; display: flex; flex-direction: column; gap: 10px; }
         
-        /* 🤖 በኦቶማቲክ የተሞሉ አብረው የሚበሩት 23 ቁጥሮች (የማያደናግር ውብ ዲዛይን) */
-        .num-btn.auto-filled { 
-            background: #17143a !important; 
-            color: #00ffcc !important; 
-            border: 2px solid #00ffcc !important; 
+        /* የቅርብ ጊዜ የወጡ 4 ቁጥሮች ታሪክ */
+        .history-balls { display: flex; justify-content: space-between; gap: 2px; }
+        .ball-history {
+            width: 23%; aspect-ratio: 1; background: #6f42c1; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold;
         }
 
-        /* 🎴 5x5 ማትሪክስ ሰሌዳ */
-        .cartel-section { background: #151233; padding: 15px; border-radius: 12px; border: 1px solid #252152; }
-        .matrix-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
-        .matrix-cell {
-            background: #1e1a44; border: 2px dashed #3a337a; border-radius: 10px;
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: bold; color: #ffffff; transition: all 0.3s;
+        /* 🔵 ትልቁ የአሁኑ ቁጥር ማሳያ */
+        .current-ball-zone {
+            background: #1e163d; border-radius: 10px; padding: 20px 0; text-align: center;
         }
-        .matrix-cell.filled { 
-            background: #ffffff; color: #0f0c24; border-style: solid; border-color: #ffffff; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        .matrix-cell.star { 
-            background: #ffcc00; color: #0f0c24; font-size: 24px; border-style: solid; border-color: #ffcc00; 
-            box-shadow: 0 0 8px #ffcc00;
+        .big-ball {
+            width: 75px; height: 75px; background: #ffffff; border: 4px solid #ffcc00;
+            border-radius: 50%; color: #007bff; display: inline-flex; align-items: center;
+            justify-content: center; font-size: 22px; font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
         }
 
-        /* 🟢 የመመዝገቢያ አዝራር */
-        .play-btn {
-            background: #252152; color: #5b568c; border: none; width: 100%;
-            padding: 16px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-top: 15px;
-            cursor: not-allowed; transition: all 0.3s ease;
+        /* 🔒 የመጠበቂያ ሰሌዳ (Watching Only) */
+        .status-screen {
+            background: #1e163d; border-radius: 10px; flex-grow: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px 10px; text-align: center; min-height: 180px;
         }
-        .play-btn.active {
-            background: #00ffaa; color: #0f0c24; cursor: pointer; font-size: 17px;
-            box-shadow: 0 5px 15px rgba(0, 255, 170, 0.4);
-        }
+        .status-title { font-size: 18px; font-weight: bold; color: #ffffff; letter-spacing: 1px; margin-bottom: 10px; }
+        .status-desc { font-size: 13px; color: #a5a1d4; line-height: 1.5; }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        /* 🧭 የታችኛው ማውጫ */
-        .footer-nav {
-            display: flex; justify-content: space-around; background: #151233; 
-            position: fixed; bottom: 0; left: 0; right: 0; padding: 14px 0; border-top: 1px solid #252152;
-        }
-        .nav-item { color: #5b568c; font-size: 12px; background: none; border: none; width: 33%; cursor: pointer; font-weight: bold; }
-        .nav-item.active { color: #00ffaa; }
+        /* 🔘 የታችኛው አዝራሮች */
+        .bottom-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; position: fixed; bottom: 10px; left: 10px; right: 10px; }
+        .btn-act { padding: 12px 0; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; text-align: center; }
+        .btn-leave { background: #dc3545; color: white; }
+        .btn-refresh { background: #343a40; color: white; }
+        .btn-watch { background: #2d235c; color: #6c757d; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="header-stats">
-        <div class="stat-box">MAIN WALLET<span id="lbl-main" class="stat-val val-main">100.00</span></div>
-        <div class="stat-box">PLAY WALLET<span id="lbl-play" class="stat-val val-play">0.00</span></div>
-        <div class="stat-box">STAKE<span class="stat-val val-stake">10</span></div>
-        <div class="stat-box">TIMER<span class="stat-val val-timer">30 s</span></div>
+    <!-- 📊 የላይኛው መረጃ ሰሌዳ -->
+    <div class="top-stats">
+        <div class="stat-box">Game ID<span id="game-id">---</span></div>
+        <div class="stat-box">Players<span id="player-count">0</span></div>
+        <div class="stat-box">Bet<span>10</span></div>
+        <div class="stat-box">Derash<span id="pool-amount">0</span></div>
+        <div class="stat-box">Called<span id="called-count">0</span></div>
     </div>
 
-    <div id="tab-game" class="tab-content active">
-        <div class="numbers-grid" id="grid-board"></div>
-        <div class="cartel-section">
-            <div style="text-align:left; font-size:14px; color:#ffcc00; font-weight:bold;">የአሁኑ ማትሪክስ ሰሌዳ</div>
-            <div class="matrix-grid" id="matrix-board"></div>
+    <!-- 🏆 ዋናው አቀማመጥ -->
+    <div class="main-container">
+        <!-- 🔢 የቢንጎ 1-75 ሰሌዳ -->
+        <div class="bingo-board" id="grid-board">
+            <div class="letter-header b-lbl">B</div>
+            <div class="letter-header i-lbl">I</div>
+            <div class="letter-header n-lbl">N</div>
+            <div class="letter-header g-lbl">G</div>
+            <div class="letter-header o-lbl">O</div>
         </div>
-        <button id="btn-submit" class="play-btn" disabled>መጀመሪያ ቁጥር ይምረጡ 🎰</button>
-    </div>
 
-    <div id="tab-wallet" class="tab-content" style="padding: 20px 10px;">
-        <div style="background:#151233; padding:20px; border-radius:12px; text-align:left; border: 1px solid #252152;">
-            <h3 style="color:#ffcc00; margin-top:0;">📥 በቴሌብር ገንዘብ መሙያ</h3>
-            <input type="number" id="dep-amt" placeholder="የሚሞላው የብር መጠን" style="width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #3a337a; background:#1e1a44; color:white; font-size:16px;">
-            <button onclick="sendAction('deposit')" style="width:100%; padding:14px; background:#ff5500; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:16px;">ፎርሙን ለቦቱ ላክ</button>
+        <!-- 📺 የቀኝ የቀጥታ መከታተያ ሰሌዳ -->
+        <div class="live-side">
+            <!-- የቅርብ ጊዜ 4 ታሪክ -->
+            <div class="history-balls" id="history-container">
+                <div class="ball-history">-</div>
+                <div class="ball-history">-</div>
+                <div class="ball-history">-</div>
+                <div class="ball-history">-</div>
+            </div>
+
+            <!-- ትልቁ ኳስ -->
+            <div class="current-ball-zone">
+                <div class="big-ball" id="current-big-ball">---</div>
+            </div>
+
+            <!-- የመጠበቂያ መልዕክት -->
+            <div class="status-screen">
+                <div class="status-title">WATCHING ONLY</div>
+                <div class="status-desc" id="dynamic-status">የዚህ ዙር ጨዋታ ተጀምሯል። አዲስ ዙር እስኪጀምር እዚህ ይጠብቁ::</div>
+            </div>
         </div>
     </div>
 
-    <div id="tab-ref" class="tab-content" style="padding: 40px 10px;">
-        <div style="background:#151233; padding:30px; border-radius:12px; border: 1px solid #252152;">
-            <h3 style="color:#ffcc00;">👥 የሪፈራል ፕሮግራም</h3>
-            <p style="color:#a5a1d4; font-size:14px;">ጓደኞችዎን ይጋብዙ እና ለእያንዳንዱ ሰው የ 5 ብር ስጦታ ያግኙ!</p>
-            <button onclick="sendAction('referral')" style="padding:14px 28px; background:#00ffaa; color:#0f0c24; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:16px;">የመጋበዣ ሊንክ ማግኛ</button>
-        </div>
-    </div>
-
-    <div style="height:90px;"></div>
-    <div class="footer-nav">
-        <button class="nav-item active" onclick="switchTab('tab-game', this)">GAME</button>
-        <button class="nav-item" onclick="switchTab('tab-wallet', this)">WALLET</button>
-        <button class="nav-item" onclick="switchTab('tab-ref', this)">REFERRAL</button>
+    <!-- 🔘 የታችኛው አዝራሮች -->
+    <div class="bottom-actions">
+        <button class="btn-act btn-leave" onclick="closeApp()">LEAVE</button>
+        <button class="btn-act btn-refresh" onclick="location.reload()">REFRESH</button>
+        <button class="btn-act btn-watch" id="status-btn" disabled>WATCHING</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready(); tg.expand();
+        const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('lbl-main').innerText = parseFloat(urlParams.get('main_wallet') || '100').toFixed(2);
-        document.getElementById('lbl-play').innerText = parseFloat(urlParams.get('play_wallet') || '0').toFixed(2);
-
-        let finalChoices = [];
-
+        // 1-75 ማትሪክስ መደርደሪያ ሎጂክ (ልክ እንደ ምስሉ በአምድ አቀማመጥ)
         const board = document.getElementById('grid-board');
-        for(let i = 1; i <= 70; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'num-btn';
-            btn.id = 'nbtn-' + i;
-            btn.innerText = i;
-            btn.onclick = function() { selectAndAutoFill(i); };
-            board.appendChild(btn);
-        }
-
-        function initMatrix() {
-            const mb = document.getElementById('matrix-board'); mb.innerHTML = '';
-            for(let i=0; i<25; i++) {
-                const c = document.createElement('div');
-                c.className = (i===12) ? 'matrix-cell star' : 'matrix-cell';
-                c.innerText = (i===12) ? '⭐' : '?';
-                mb.appendChild(c);
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 5; col++) {
+                let num = (col * 15) + row + 1;
+                const cell = document.createElement('div');
+                cell.className = 'num-cell';
+                cell.id = 'cell-' + num;
+                cell.innerText = num;
+                board.appendChild(cell);
             }
         }
-        initMatrix();
 
-        // 🎯 1 ቁጥር ሲነካ ተጫዋቹ የመረጠውን እና ሲስተሙ የረዳውን ለይቶ ማብሪያ ሎጂክ
-        function selectAndAutoFill(num) {
-            // ሁሉንም ሰርዞ ማጽዳት
-            document.querySelectorAll('.numbers-grid .num-btn').forEach(b => {
-                b.classList.remove('user-picked', 'auto-filled');
-            });
+        // 🔄 ከፓይተን ሰርቨር መረጃዎችን በየሰከንዱ ተቀብሎ በቀጥታ (Live) ማሳያ ሎጂክ
+        function updateLiveState() {
+            fetch('/game-state') // የፓይተን API ሊንክህ
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('game-id').innerText = data.game_id;
+                    document.getElementById('player-count').innerText = data.players;
+                    document.getElementById('pool-amount').innerText = data.pool;
+                    document.getElementById('called-count').innerText = data.called_list.length;
 
-            // 1. ተጫዋቹ የነካው ቁጥር ብቻ (User Picked)
-            finalChoices = [num];
-            document.getElementById('nbtn-' + num).classList.add('user-picked');
+                    // ሁሉንም አብርቶ ማጥፋት
+                    document.querySelectorAll('.num-cell').forEach(c => c.classList.remove('called'));
 
-            // 2. ሲስተሙ የሞላቸው ቀሪዎቹ 23 ቁጥሮች (Auto Filled)
-            while(finalChoices.length < 24) {
-                let r = Math.floor(Math.random() * 70) + 1;
-                if(!finalChoices.includes(r)) {
-                    finalChoices.push(r);
-                    document.getElementById('nbtn-' + r).classList.add('auto-filled');
-                }
-            }
+                    // የወጡትን ቁጥሮች በሙሉ በቦርዱ ላይ ማብራት
+                    data.called_list.forEach(num => {
+                        const cell = document.getElementById('cell-' + num);
+                        if(cell) cell.classList.add('called');
+                    });
 
-            // 5x5 ማትሪክስ ሰሌዳውን በነጩ መሙላት
-            const mb = document.getElementById('matrix-board'); mb.innerHTML = '';
-            let idx = 0;
-            for(let i=0; i<25; i++) {
-                const c = document.createElement('div');
-                if(i===12) {
-                    c.className = 'matrix-cell star'; c.innerText = '⭐';
-                } else {
-                    c.className = 'matrix-cell filled'; c.innerText = finalChoices[idx++];
-                }
-                mb.appendChild(c);
-            }
+                    // ትልቁን የአሁኑን ኳስ ማሳየት
+                    if(data.called_list.length > 0) {
+                        let lastNum = data.called_list[data.called_list.length - 1];
+                        document.getElementById('current-big-ball').innerText = getLetter(lastNum) + "-" + lastNum;
+                    } else {
+                        document.getElementById('current-big-ball').innerText = "---";
+                    }
 
-            const sBtn = document.getElementById('btn-submit');
-            sBtn.disabled = false;
-            sBtn.className = 'play-btn active';
-            sBtn.innerText = "በ 10 ብር ተመዝገብ 🎰";
+                    // የታሪክ 4 ኳሶችን ማሳየት
+                    const historyContainer = document.getElementById('history-container');
+                    historyContainer.innerHTML = '';
+                    let history = data.called_list.slice(-5, -1).reverse();
+                    for(let i=0; i<4; i++) {
+                        const hBall = document.createElement('div');
+                        hBall.className = 'ball-history';
+                        if(history[i]) {
+                            hBall.innerText = getLetter(history[i]) + "-" + history[i];
+                        } else {
+                            hBall.innerText = "-";
+                        }
+                        historyContainer.appendChild(hBall);
+                    }
+
+                    // የጨዋታውን ሁኔታ ማሳያ
+                    if(data.is_running) {
+                        document.getElementById('dynamic-status').innerText = "የዚህ ዙር ጨዋታ ተጀምሯል። አዲስ ዙር እስኪጀምር እዚህ ይጠብቁ::";
+                    } else {
+                        document.getElementById('dynamic-status').innerText = "ቀጣዩ ዙር በቅርቡ ይጀምራል... በመጠባበቅ ላይ ነዎት።";
+                    }
+                }).catch(() => {});
         }
 
-        document.getElementById('btn-submit').onclick = function() {
-            if(finalChoices.length === 24) {
-                tg.sendData(JSON.stringify({ action: "buy_cartel", choices: finalChoices }));
-                tg.close();
-            }
-        };
-
-        function switchTab(id, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); el.classList.add('active');
+        function getLetter(num) {
+            if(num <= 15) return 'B';
+            if(num <= 30) return 'I';
+            if(num <= 45) return 'N';
+            if(num <= 60) return 'G';
+            return 'O';
         }
 
-        function sendAction(type) {
-            let d = { action: type };
-            if(type === 'deposit') {
-                const amt = document.getElementById('dep-amt').value;
-                if(!amt) { alert('እባክዎ መጠን ያስገቡ!'); return; }
-                d.amount = amt;
-            }
-            tg.sendData(JSON.stringify(d)); tg.close();
-        }
+        setInterval(updateLiveState, 1500); // በየ 1.5 ሰከንድ መረጃውን ያድሳል
+        updateLiveState();
+
+        function closeApp() { tg.close(); }
     </script>
 </body>
 </html>
