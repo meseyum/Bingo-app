@@ -3,58 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperBingo2026</title>
+    <title>SuperBingo2026 - Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: #171131; color: white; font-family: sans-serif; padding: 12px; }
+        body { background-color: #0f0a24; color: white; font-family: sans-serif; padding: 8px; }
         
-        .header-stats { display: flex; justify-content: space-between; background: #1e163d; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
-        .stat-val { color: #00ffcc; font-weight: bold; display: block; margin-top: 4px; }
+        /* 📊 የላይኛው መረጃ ሰሌዳ */
+        .header-status { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #1a123a; padding: 8px; border-radius: 8px; margin-bottom: 8px; text-align: center; border: 1px solid #2d1f66; }
+        .hd-lbl { color: #7f73b5; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+        .hd-val { color: #00ffcc; font-size: 13px; font-weight: bold; }
+        .hd-timer { color: #ff3366; font-size: 13px; font-weight: bold; }
 
-        /* 5x5 የካርቴላ ሰሌዳ ዲዛይን */
-        .matrix-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
-        .grid-cell { background: #251f47; color: white; font-weight: bold; font-size: 18px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: background 0.3s ease; }
-        .grid-cell.star { background: #ffcc00; color: #171131; font-size: 22px; }
+        /* 🎰 የ 1-90 ዋና ሰሌዳ (ባለ 8 ኮለምን መከታተያ) */
+        .main-tracker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; background: rgba(0, 0, 0, 0.3); padding: 6px; border-radius: 8px; margin-bottom: 10px; }
+        .track-cell { background: #1c1541; color: #695e9b; font-weight: bold; font-size: 12px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .track-cell.called { background: #ff5722 !important; color: white !important; box-shadow: 0 0 5px #ff5722; }
+
+        /* 📋 የ 5x5 የጨዋታ ካርቴላ ሰሌዳ እና መራጭ */
+        .game-layout { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .cartel-section { background: #140d30; padding: 10px; border-radius: 8px; border: 1px solid #23194c; text-align: center; }
+        .section-title { color: #ffcc00; font-size: 12px; font-weight: bold; margin-bottom: 6px; text-align: left; text-transform: uppercase; }
         
-        /* 🔥 ቁልፍ ማስተካከያ፡ እጣ የወጣላቸውን ቁጥሮች ልክ እንደ ምስሉ በደመቀ ቀለም ማሳመሪያ (ማስመሪያ) */
-        .grid-cell.hit { background: #e65100 !important; color: white !important; border: 2px solid #ffb74d; }
+        .matrix-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: #0b061c; padding: 6px; border-radius: 6px; }
+        .matrix-cell { background: #ffffff; color: #0f0a24; font-weight: bold; font-size: 16px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+        .matrix-cell.center-star { background: #ffcc00; color: #0f0a24; font-size: 20px; }
+        .matrix-cell.marked { background: #00e676 !important; color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
 
-        .btn-register { width: 100%; background: #00ffcc; color: #171131; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .btn-register:disabled { background: #443c68; color: #7f78a7; }
+        /* 🔢 የካርቴላ ቁጥር መራጭ (1-100 ቁጥሮች ዝርዝር) */
+        .selector-box { background: #140d30; padding: 8px; border-radius: 8px; border: 1px solid #23194c; }
+        .selector-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; max-height: 140px; overflow-y: auto; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 6px; }
+        .select-btn { background: #ff5722; color: white; font-weight: bold; font-size: 11px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: none; cursor: pointer; }
+        .select-btn.active { background: #00e676 !important; box-shadow: 0 0 6px #00e676; }
 
-        /* 🏆 አሸናፊ ሲኖር ብቅ የሚል ሰሌዳ */
-        .winner-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(23, 17, 49, 0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .win-title { font-size: 36px; font-weight: bold; color: #ffcc00; }
+        /* 💰 ዋና አዝራር */
+        .action-container { margin-top: 10px; }
+        .btn-submit { width: 100%; background: #00e676; color: #0f0a24; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,230,118,0.3); }
+        .btn-submit:disabled { background: #2a224d; color: #5c5385; box-shadow: none; cursor: not-allowed; }
+
+        /* 🏆 የቢንጎ አሸናፊ ሰሌዳ ፖፕአፕ */
+        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 10, 36, 0.98); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+        .popup-card { background: #1a123a; padding: 25px; border-radius: 12px; border: 2px solid #ffcc00; width: 85%; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="header-stats">
-        <div>ዋና ሂሳብ<span class="stat-val">100.00 ብር</span></div>
-        <div>ቀሪ ሰከንድ<span class="stat-val" id="timer">30 s</span></div>
-        <div>የወጡ ቁጥሮች<span class="stat-val" id="called-count" style="color:#ffcc00;">0</span></div>
+    <div class="header-status">
+        <div>
+            <div class="hd-lbl">WALLET</div>
+            <div class="hd-val" id="wallet-balance">0.00</div>
+        </div>
+        <div>
+            <div class="hd-lbl">PLAYERS</div>
+            <div class="hd-val" id="player-count">0</div>
+        </div>
+        <div>
+            <div class="hd-lbl">POOL</div>
+            <div class="hd-val" id="pool-prize" style="color: #ffcc00;">0 ብር</div>
+        </div>
+        <div>
+            <div class="hd-lbl">ROUND</div>
+            <div class="hd-timer" id="round-timer">30s</div>
+        </div>
     </div>
 
-    <div class="matrix-grid" id="cartel-view"></div>
+    <div class="main-tracker" id="main-board-grid"></div>
 
-    <button class="btn-register" id="action-btn" onclick="registerCartel()">በ 10 ብር ተመዝገብ 🎰</button>
+    <div class="game-layout">
+        <div class="cartel-section">
+            <div class="section-title" id="cartel-title">የአሁኑ ካርቴላ ቁጥር: -</div>
+            <div class="matrix-grid" id="matrix-board"></div>
+        </div>
 
-    <div class="winner-popup" id="winner-screen">
-        <div style="font-size: 60px;">👑</div>
-        <div class="win-title">BINGO!</div>
-        <div id="winner-text" style="font-size: 22px; margin: 15px 0;"></div>
+        <div class="selector-box">
+            <div class="section-title">የካርቴላ ቁጥር ይምረጡ (1-100)</div>
+            <div class="selector-grid" id="number-selector"></div>
+        </div>
+    </div>
+
+    <div class="action-container">
+        <button class="btn-submit" id="main-action-btn" onclick="registerToGame()">በ 2 ብር ተመዝገብ 🎰</button>
+    </div>
+
+    <div class="popup-overlay" id="win-popup">
+        <div class="popup-card">
+            <div style="font-size: 45px; margin-bottom: 5px;">👑</div>
+            <h1 style="color:#ffcc00; font-size:32px; margin-bottom:8px;">BINGO!</h1>
+            <h2 id="win-user-name" style="color:white; margin-bottom:12px;"></h2>
+            <p style="color:#00e676; font-size:16px; font-weight:bold;" id="win-prize-amount"></p>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-        let myNumbers = [];
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id') || "99999";
+        
+        let selectedCartelNo = 1;
+        let myMatrixNumbers = [];
 
-        // 5x5 ካርቴላ ማመንጫ
-        function generateCartel() {
-            const view = document.getElementById('cartel-view');
-            view.innerHTML = '';
+        // 1-90 ሰሌዳ መፍጠሪያ
+        const mainBoard = document.getElementById('main-board-grid');
+        for (let i = 1; i <= 90; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'track-cell';
+            cell.innerText = i;
+            cell.id = 'tr-' + i;
+            mainBoard.appendChild(cell);
+        }
+
+        // 1-100 የካርቴላ መምረጫ ቁልፎች መፍጠሪያ
+        const selectorGrid = document.getElementById('number-selector');
+        for (let i = 1; i <= 100; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'select-btn';
+            if(i === 75) btn.classList.add('active'); // 75 ነባሪ ምርጫ
+            btn.innerText = i;
+            btn.id = 'sel-' + i;
+            btn.onclick = () => changeCartelNumber(i);
+            selectorGrid.appendChild(btn);
+        }
+
+        // የ 5x5 ማትሪክስ ቁጥሮች ማመንጫ
+        function generateMatrix(seed) {
+            const matrixGrid = document.getElementById('matrix-board');
+            matrixGrid.innerHTML = '';
+            myMatrixNumbers = [];
             
+            // የዘፈቀደ ቁጥር በዘር (seed) ማመንጫ ፎርሙላ
+            let randomBySeed = function(max, min) {
+                seed = (seed * 9301 + 49297) % 233280;
+                return Math.floor(min + (seed / 233280) * (max - min));
+            };
+
             let pools = [
                 Array.from({length: 15}, (_, i) => i + 1),
                 Array.from({length: 15}, (_, i) => i + 16),
@@ -63,57 +144,79 @@
                 Array.from({length: 15}, (_, i) => i + 61)
             ];
 
-            for(let row=0; row<5; row++) {
-                for(let col=0; col<5; col++) {
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
                     const cell = document.createElement('div');
-                    if(row === 2 && col === 2) {
-                        cell.className = "grid-cell star";
+                    if(r === 2 && c === 2) {
+                        cell.className = "matrix-cell center-star";
                         cell.innerText = "⭐";
                     } else {
-                        cell.className = "grid-cell";
-                        let randIndex = Math.floor(Math.random() * pools[col].length);
-                        let num = pools[col].splice(randIndex, 1)[0];
+                        cell.className = "matrix-cell";
+                        let randIdx = randomBySeed(pools[c].length, 0);
+                        let num = pools[c].splice(randIdx, 1)[0];
                         cell.innerText = num;
-                        cell.id = "num-" + num; // ለእያንዳንዱ ቁጥር መለያ መስጠት
-                        myNumbers.push(num);
+                        cell.id = "mx-" + num;
+                        myMatrixNumbers.push(num);
                     }
-                    view.appendChild(cell);
+                    matrixGrid.appendChild(cell);
                 }
             }
         }
-        generateCartel();
+        generateMatrix(75); // መጀመሪያ በ 75 ያስነሳው
 
-        function registerCartel() {
-            tg.sendData(JSON.stringify({ action: "buy_cartel", choices: myNumbers }));
-            document.getElementById('action-btn').disabled = true;
-            document.getElementById('action-btn').innerText = "ጨዋታው እስኪጀምር ይጠብቁ...";
+        function changeCartelNumber(num) {
+            document.querySelectorAll('.select-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('sel-' + num).classList.add('active');
+            selectedCartelNo = num;
+            document.getElementById('cartel-title').innerText = "የአሁኑ ካርቴላ ቁጥር: " + num;
+            generateMatrix(num);
         }
 
-        // 🔄 በየሰከንዱ ከፓይተን ሰርቨር ጋር እየተገናኘ ቁጥሮችን የሚያሰምር ሎጂክ
-        function syncLiveGame() {
-            fetch('http://localhost:8080/game-state')
+        function registerToGame() {
+            tg.sendData(JSON.stringify({
+                action: "buy_ticket",
+                cartel_no: selectedCartelNo,
+                matrix: myMatrixNumbers
+            }));
+            document.getElementById('main-action-btn').disabled = true;
+            document.getElementById('main-action-btn').innerText = "በመጠባበቅ ላይ...";
+        }
+
+        // የቀጥታ መረጃ ማመሳሰያ (Live Sync Engine)
+        function syncServerEngine() {
+            fetch(`http://localhost:8080/game-state?user_id=${userId}`)
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('timer').innerText = data.timer + " s";
-                    document.getElementById('called-count').innerText = data.called_list.length;
+                    document.getElementById('wallet-balance').innerText = parseFloat(data.balance).toFixed(2) + " 💰";
+                    document.getElementById('player-count').innerText = data.players;
+                    document.getElementById('pool-prize').innerText = data.pool + " ብር";
+                    document.getElementById('round-timer').innerText = data.timer + "s";
                     
-                    // 🔥 ፓይተን ያወጣቸውን ቁጥሮች በሙሉ እያረጋገጠ ቀለም ያሰምራል!
+                    // ዋና ሰሌዳውን አብራ
                     data.called_list.forEach(num => {
-                        const cell = document.getElementById("num-" + num);
-                        if(cell) {
-                            cell.classList.add('hit'); // ብርቱካናማ ቀለም ያደርገዋል
-                        }
+                        const cell = document.getElementById('tr-' + num);
+                        if(cell) cell.classList.add('called');
+
+                        // የራሳችን ካርቴላ ቁጥሮች ላይ ካለ አብራ
+                        const mxCell = document.getElementById('mx-' + num);
+                        if(mxCell) mxCell.classList.add('marked');
                     });
 
-                    if(data.winner_name) {
-                        document.getElementById('winner-text').innerText = data.winner_name + " አሸንፏል! 🏆";
-                        document.getElementById('winner-screen').style.display = 'flex';
+                    // አሸናፊ ሲኖር ፖፕአፕ አሳይ
+                    if(data.winner) {
+                        document.getElementById('win-user-name').innerText = data.winner + " አሸንፏል!";
+                        document.getElementById('win-prize-amount').innerText = "+" + data.pool + " ብር ወደ አካውንት ገብቷል! 🎉";
+                        document.getElementById('win-popup').style.display = 'flex';
                     } else {
-                        document.getElementById('winner-screen').style.display = 'none';
+                        document.getElementById('win-popup').style.display = 'none';
+                        if(!data.is_running) {
+                            document.getElementById('main-action-btn').disabled = false;
+                            document.getElementById('main-action-btn').innerText = "በ 2 ብር ተመዝገብ 🎰";
+                        }
                     }
                 }).catch(() => {});
         }
-        setInterval(syncLiveGame, 1000); // በየ 1 ሰከንዱ መረጃ ያድሳል
+        setInterval(syncServerEngine, 1000);
     </script>
 </body>
 </html>
