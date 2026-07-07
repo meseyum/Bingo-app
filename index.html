@@ -3,220 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperBingo2026 - Premium</title>
+    <title>SuperBingo2026 Roulette</title>
+    <!-- የቴሌግራም ሚኒ አፕ ስክሪፕት -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: #0f0a24; color: white; font-family: sans-serif; padding: 8px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .balance-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        /* የሚሽከረከረው ገበታ ዲዛይን */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid #gold;
+            background: conic-gradient(
+                #e74c3c 0deg 45deg, #2c3e50 45deg 90deg,
+                #e74c3c 90deg 135deg, #2c3e50 135deg 180deg,
+                #e74c3c 180deg 225deg, #2c3e50 225deg 270deg,
+                #e74c3c 270deg 315deg, #27ae60 315deg 360deg
+            );
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.1, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #f1c40f;
+            z-index: 10;
+        }
+        /* የውርርድ በተኖች */
+        .bet-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-red { background-color: #e74c3c; color: white; }
+        .btn-black { background-color: #2c3e50; color: white; }
+        .btn-green { background-color: #27ae60; color: white; }
+        .btn:active { transform: scale(0.95); }
         
-        /* 📊 የላይኛው መረጃ ሰሌዳ */
-        .header-status { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #1a123a; padding: 8px; border-radius: 8px; margin-bottom: 8px; text-align: center; border: 1px solid #2d1f66; }
-        .hd-lbl { color: #7f73b5; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
-        .hd-val { color: #00ffcc; font-size: 13px; font-weight: bold; }
-        .hd-timer { color: #ff3366; font-size: 13px; font-weight: bold; }
-
-        /* 🎰 የ 1-90 ዋና ሰሌዳ (ባለ 8 ኮለምን መከታተያ) */
-        .main-tracker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; background: rgba(0, 0, 0, 0.3); padding: 6px; border-radius: 8px; margin-bottom: 10px; }
-        .track-cell { background: #1c1541; color: #695e9b; font-weight: bold; font-size: 12px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
-        .track-cell.called { background: #ff5722 !important; color: white !important; box-shadow: 0 0 5px #ff5722; }
-
-        /* 📋 የ 5x5 የጨዋታ ካርቴላ ሰሌዳ እና መራጭ */
-        .game-layout { display: grid; grid-template-columns: 1fr; gap: 8px; }
-        .cartel-section { background: #140d30; padding: 10px; border-radius: 8px; border: 1px solid #23194c; text-align: center; }
-        .section-title { color: #ffcc00; font-size: 12px; font-weight: bold; margin-bottom: 6px; text-align: left; text-transform: uppercase; }
-        
-        .matrix-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: #0b061c; padding: 6px; border-radius: 6px; }
-        .matrix-cell { background: #ffffff; color: #0f0a24; font-weight: bold; font-size: 16px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-        .matrix-cell.center-star { background: #ffcc00; color: #0f0a24; font-size: 20px; }
-        .matrix-cell.marked { background: #00e676 !important; color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-
-        /* 🔢 የካርቴላ ቁጥር መራጭ (1-100 ቁጥሮች ዝርዝር) */
-        .selector-box { background: #140d30; padding: 8px; border-radius: 8px; border: 1px solid #23194c; }
-        .selector-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; max-height: 140px; overflow-y: auto; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 6px; }
-        .select-btn { background: #ff5722; color: white; font-weight: bold; font-size: 11px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: none; cursor: pointer; }
-        .select-btn.active { background: #00e676 !important; box-shadow: 0 0 6px #00e676; }
-
-        /* 💰 ዋና አዝራር */
-        .action-container { margin-top: 10px; }
-        .btn-submit { width: 100%; background: #00e676; color: #0f0a24; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,230,118,0.3); }
-        .btn-submit:disabled { background: #2a224d; color: #5c5385; box-shadow: none; cursor: not-allowed; }
-
-        /* 🏆 የቢንጎ አሸናፊ ሰሌዳ ፖፕአፕ */
-        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 10, 36, 0.98); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
-        .popup-card { background: #1a123a; padding: 25px; border-radius: 12px; border: 2px solid #ffcc00; width: 85%; text-align: center; }
+        .spin-btn {
+            background: linear-gradient(45deg, #f1c40f, #f39c12);
+            color: #1f1c2c;
+            font-size: 20px;
+            padding: 15px 40px;
+            margin-top: 25px;
+            width: 80%;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            min-height: 30px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-status">
-        <div>
-            <div class="hd-lbl">WALLET</div>
-            <div class="hd-val" id="wallet-balance">0.00</div>
-        </div>
-        <div>
-            <div class="hd-lbl">PLAYERS</div>
-            <div class="hd-val" id="player-count">0</div>
-        </div>
-        <div>
-            <div class="hd-lbl">POOL</div>
-            <div class="hd-val" id="pool-prize" style="color: #ffcc00;">0 ብር</div>
-        </div>
-        <div>
-            <div class="hd-lbl">ROUND</div>
-            <div class="hd-timer" id="round-timer">30s</div>
-        </div>
+    <div class="header">
+        <h2>👑 SuperBingo2026 Roulette</h2>
+        <div class="balance-container">💰 ባላንስ: <span id="balance">500.00</span> ETB</div>
     </div>
 
-    <div class="main-tracker" id="main-board-grid"></div>
-
-    <div class="game-layout">
-        <div class="cartel-section">
-            <div class="section-title" id="cartel-title">የአሁኑ ካርቴላ ቁጥር: -</div>
-            <div class="matrix-grid" id="matrix-board"></div>
-        </div>
-
-        <div class="selector-box">
-            <div class="section-title">የካርቴላ ቁጥር ይምረጡ (1-100)</div>
-            <div class="selector-grid" id="number-selector"></div>
-        </div>
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel"></div>
     </div>
 
-    <div class="action-container">
-        <button class="btn-submit" id="main-action-btn" onclick="registerToGame()">በ 2 ብር ተመዝገብ 🎰</button>
+    <p>ለመወራረድ የሚፈልጉትን ቀለም ይምረጡ፦</p>
+    <div class="bet-buttons">
+        <button class="btn btn-red" onclick="selectColor('red')">🔴 ቀይ (2x)</button>
+        <button class="btn btn-black" onclick="selectColor('black')">⚫ ጥቁር (2x)</button>
+        <button class="btn btn-green" onclick="selectColor('green')">🟢 አረንጓዴ (5x)</button>
     </div>
+    <p id="selected-info" style="color: #f1c40f; font-weight: bold; margin-top: 10px;"></p>
 
-    <div class="popup-overlay" id="win-popup">
-        <div class="popup-card">
-            <div style="font-size: 45px; margin-bottom: 5px;">👑</div>
-            <h1 style="color:#ffcc00; font-size:32px; margin-bottom:8px;">BINGO!</h1>
-            <h2 id="win-user-name" style="color:white; margin-bottom:12px;"></h2>
-            <p style="color:#00e676; font-size:16px; font-weight:bold;" id="win-prize-amount"></p>
-        </div>
-    </div>
+    <button class="btn spin-btn" onclick="spinWheel()">🎡 ገበታውን አሽከርክር</button>
+
+    <div class="result" id="result-display"></div>
 
     <script>
-        const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('user_id') || "99999";
-        
-        let selectedCartelNo = 1;
-        let myMatrixNumbers = [];
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // ጌሙን በሙሉ ስክሪን ይከፍተዋል
 
-        // 1-90 ሰሌዳ መፍጠሪያ
-        const mainBoard = document.getElementById('main-board-grid');
-        for (let i = 1; i <= 90; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'track-cell';
-            cell.innerText = i;
-            cell.id = 'tr-' + i;
-            mainBoard.appendChild(cell);
+        let currentBalance = 500.00;
+        let selectedColor = null;
+        let isSpinning = false;
+
+        function selectColor(color) {
+            if(isSpinning) return;
+            selectedColor = color;
+            let colorText = color === 'red' ? '🔴 ቀይ' : color === 'black' ? '⚫ ጥቁር' : '🟢 አረንጓዴ';
+            document.getElementById('selected-info').innerText = "የተመረጠው ቀለም: " + colorText + " (ውርርድ: 50 ETB)";
         }
 
-        // 1-100 የካርቴላ መምረጫ ቁልፎች መፍጠሪያ
-        const selectorGrid = document.getElementById('number-selector');
-        for (let i = 1; i <= 100; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'select-btn';
-            if(i === 75) btn.classList.add('active'); // 75 ነባሪ ምርጫ
-            btn.innerText = i;
-            btn.id = 'sel-' + i;
-            btn.onclick = () => changeCartelNumber(i);
-            selectorGrid.appendChild(btn);
-        }
-
-        // የ 5x5 ማትሪክስ ቁጥሮች ማመንጫ
-        function generateMatrix(seed) {
-            const matrixGrid = document.getElementById('matrix-board');
-            matrixGrid.innerHTML = '';
-            myMatrixNumbers = [];
-            
-            // የዘፈቀደ ቁጥር በዘር (seed) ማመንጫ ፎርሙላ
-            let randomBySeed = function(max, min) {
-                seed = (seed * 9301 + 49297) % 233280;
-                return Math.floor(min + (seed / 233280) * (max - min));
-            };
-
-            let pools = [
-                Array.from({length: 15}, (_, i) => i + 1),
-                Array.from({length: 15}, (_, i) => i + 16),
-                Array.from({length: 15}, (_, i) => i + 31),
-                Array.from({length: 15}, (_, i) => i + 46),
-                Array.from({length: 15}, (_, i) => i + 61)
-            ];
-
-            for(let r=0; r<5; r++) {
-                for(let c=0; c<5; c++) {
-                    const cell = document.createElement('div');
-                    if(r === 2 && c === 2) {
-                        cell.className = "matrix-cell center-star";
-                        cell.innerText = "⭐";
-                    } else {
-                        cell.className = "matrix-cell";
-                        let randIdx = randomBySeed(pools[c].length, 0);
-                        let num = pools[c].splice(randIdx, 1)[0];
-                        cell.innerText = num;
-                        cell.id = "mx-" + num;
-                        myMatrixNumbers.push(num);
-                    }
-                    matrixGrid.appendChild(cell);
-                }
+        function spinWheel() {
+            if (isSpinning) return;
+            if (!selectedColor) {
+                alert("እባክዎ መጀመሪያ ቀለም ይምረጡ!");
+                return;
             }
+            if (currentBalance < 50) {
+                alert("በቂ ባላንስ የለዎትም!");
+                return;
+            }
+
+            isSpinning = true;
+            currentBalance -= 50; // የ 50 ብር ውርርድ ይቆርጣል
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
+            document.getElementById('result-display').innerText = "ገበታው እየተሽከረከረ ነው... 🎰";
+
+            let wheel = document.getElementById('wheel');
+            // የዘፈቀደ ዲግሪ ማሽከርከሪያ (ቢያንስ 5 ዙር እንዲዞር)
+            let randomDegree = Math.floor(Math.random() * 360) + 1800; 
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                let actualDegree = randomDegree % 360;
+                let winningColor = 'red';
+
+                // ዲግሪውን መሰረት በማድረግ ቀለሙን መለየት
+                if (actualDegree >= 0 && actualDegree < 45) winningColor = 'red';
+                else if (actualDegree >= 45 && actualDegree < 90) winningColor = 'black';
+                else if (actualDegree >= 90 && actualDegree < 135) winningColor = 'red';
+                else if (actualDegree >= 135 && actualDegree < 180) winningColor = 'black';
+                else if (actualDegree >= 180 && actualDegree < 225) winningColor = 'red';
+                else if (actualDegree >= 225 && actualDegree < 270) winningColor = 'black';
+                else if (actualDegree >= 270 && actualDegree < 315) winningColor = 'red';
+                else winningColor = 'green';
+
+                // አሸናፊውን ማሳወቅ
+                if (selectedColor === winningColor) {
+                    let multiplier = winningColor === 'green' ? 5 : 2;
+                    let winAmount = 50 * multiplier;
+                    currentBalance += winAmount;
+                    document.getElementById('result-display').innerHTML = `<span style="color: #27ae60;">🎉 አሸነፉ! +${winAmount} ETB አገኙ!</span>`;
+                } else {
+                    document.getElementById('result-display').innerHTML = `<span style="color: #e74c3c;">😢 አልተሳካም! የወጣው ቀለም ${winningColor === 'red' ? '🔴' : winningColor === 'black' ? '⚫' : '🟢'} ነበር።</span>`;
+                }
+                
+                document.getElementById('balance').innerText = currentBalance.toFixed(2);
+                selectedColor = null;
+                document.getElementById('selected-info').innerText = "";
+            }, 4000); // ከ 4 ሰከንድ በኋላ ገበታው ይቆማል
         }
-        generateMatrix(75); // መጀመሪያ በ 75 ያስነሳው
-
-        function changeCartelNumber(num) {
-            document.querySelectorAll('.select-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('sel-' + num).classList.add('active');
-            selectedCartelNo = num;
-            document.getElementById('cartel-title').innerText = "የአሁኑ ካርቴላ ቁጥር: " + num;
-            generateMatrix(num);
-        }
-
-        function registerToGame() {
-            tg.sendData(JSON.stringify({
-                action: "buy_ticket",
-                cartel_no: selectedCartelNo,
-                matrix: myMatrixNumbers
-            }));
-            document.getElementById('main-action-btn').disabled = true;
-            document.getElementById('main-action-btn').innerText = "በመጠባበቅ ላይ...";
-        }
-
-        // የቀጥታ መረጃ ማመሳሰያ (Live Sync Engine)
-        function syncServerEngine() {
-            fetch(`http://localhost:8080/game-state?user_id=${userId}`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('wallet-balance').innerText = parseFloat(data.balance).toFixed(2) + " 💰";
-                    document.getElementById('player-count').innerText = data.players;
-                    document.getElementById('pool-prize').innerText = data.pool + " ብር";
-                    document.getElementById('round-timer').innerText = data.timer + "s";
-                    
-                    // ዋና ሰሌዳውን አብራ
-                    data.called_list.forEach(num => {
-                        const cell = document.getElementById('tr-' + num);
-                        if(cell) cell.classList.add('called');
-
-                        // የራሳችን ካርቴላ ቁጥሮች ላይ ካለ አብራ
-                        const mxCell = document.getElementById('mx-' + num);
-                        if(mxCell) mxCell.classList.add('marked');
-                    });
-
-                    // አሸናፊ ሲኖር ፖፕአፕ አሳይ
-                    if(data.winner) {
-                        document.getElementById('win-user-name').innerText = data.winner + " አሸንፏል!";
-                        document.getElementById('win-prize-amount').innerText = "+" + data.pool + " ብር ወደ አካውንት ገብቷል! 🎉";
-                        document.getElementById('win-popup').style.display = 'flex';
-                    } else {
-                        document.getElementById('win-popup').style.display = 'none';
-                        if(!data.is_running) {
-                            document.getElementById('main-action-btn').disabled = false;
-                            document.getElementById('main-action-btn').innerText = "በ 2 ብር ተመዝገብ 🎰";
-                        }
-                    }
-                }).catch(() => {});
-        }
-        setInterval(syncServerEngine, 1000);
     </script>
 </body>
 </html>
