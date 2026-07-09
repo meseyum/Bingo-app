@@ -11,16 +11,15 @@
         .balance-box { background: #16213e; padding: 10px; border-radius: 10px; display: inline-block; margin-bottom: 20px; border: 1px solid #0f3460; }
         #user-balance { font-weight: bold; color: #2ecc71; }
         
-        /* 🎡 ዊሉ በስልክ ላይ እንዳይቆራረጥ ፍፁም ፈጣን የሚያደርገው ክፍል */
         .wheel-container { position: relative; width: 300px; height: 300px; margin: 0 auto 20px auto; }
         .pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ff4141; z-index: 10; }
         
         canvas { 
             border-radius: 50%; 
             box-shadow: 0 0 20px rgba(0,0,0,0.5); 
-            /* 🚀 በስልክ ሲፒዩ (GPU Acceleration) እንዲሽከረከር የሚያደርግ ማስተካከያ */
             will-change: transform;
-            transition: transform 4s cubic-bezier(0.25, 0.1, 0.1, 1);
+            /* 🔄 አኒሜሽኑን ሁልጊዜ ተመሳሳይና ቋሚ ፍጥነት እንዲኖረው የሚያደርግ */
+            transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         
         .bet-section, .color-section { background: #16213e; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
@@ -77,6 +76,10 @@
         let selectedBet = 10;
         let selectedColor = "";
         let isSpinning = false;
+        
+        // 🔄 ለእያንዳንዱ ዙር አዲስ ዲግሪ ለመጨመር የሚያገለግል ተለዋዋጭ
+        let currentRotation = 0; 
+        
         const totalSegments = colorsData.length;
         const segmentAngle = (2 * Math.PI) / totalSegments;
 
@@ -133,10 +136,10 @@
             const degPerSegment = 360 / totalSegments;
             const targetDegrees = 360 - (winningIndex * degPerSegment) - (degPerSegment / 2);
             
-            // 🔄 ፍጥነቱ እንዲጨምር ዙሩን ወደ 8 አሳድጌዋለሁ (በጣም ፈጣንና ለስላሳ ይሆናል)
-            const totalRotation = (360 * 8) + targetDegrees; 
+            // 🔥 [ዋናው መፍትሔ]፦ ዲግሪውን ወደ ኋላ ሳይመልስ ካለበት ላይ በየዙሩ (360 * 6) በቋሚነት ይጨምራል!
+            currentRotation += (360 * 6) + targetDegrees - (currentRotation % 360); 
 
-            canvas.style.transform = `rotate(${totalRotation}deg)`;
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
 
             setTimeout(() => {
                 isSpinning = false;
