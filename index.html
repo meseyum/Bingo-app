@@ -27,7 +27,6 @@
         }
         #user-balance { font-weight: bold; color: #2ecc71; }
         
-        /* --- 🎡 የዊል ዲዛይን --- */
         .wheel-container {
             position: relative;
             width: 300px;
@@ -49,10 +48,9 @@
         canvas {
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 10px #ffd700;
-            transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1);
+            transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         
-        /* --- 🎛️ የውርርድ መቆጣጠሪያ --- */
         .bet-section, .color-section {
             background: #16213e;
             padding: 15px;
@@ -93,7 +91,6 @@
         }
         .spin-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
         
-        /* 🔔 የውጤት ማሳያ ሰሌዳ */
         .result-popup {
             background: rgba(22, 33, 62, 0.95);
             border: 2px solid #ffd700;
@@ -139,6 +136,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // ⚠️ ቀለማቱ በትክክል በክበብ ቅርጽ እንዲሳሉ ቅደም ተከተላቸው ተስተካክሏል
         const colorsData = [
             { name: "ቀይ", code: "#ff4141", mult: 2 }, { name: "ጥቁር", code: "#2d2d2d", mult: 2 }, { name: "ሰማያዊ", code: "#3498db", mult: 3 }, { name: "ቢጫ", code: "#f1c40f", mult: 3 }, { name: "አረንጓዴ", code: "#2ecc71", mult: 5 },
             { name: "ቫዮሌት", code: "#9b59b6", mult: 5 }, { name: "ብርቱካን", code: "#e67e22", mult: 4 }, { name: "ሮዝ", code: "#e84393", mult: 4 }, { name: "ነጭ", code: "#ffffff", mult: 10 }, { name: "ግራጫ", code: "#7f8c8d", mult: 2 },
@@ -150,7 +148,7 @@
         let selectedBet = 10;
         let selectedColor = "";
         let isSpinning = false;
-        let currentRotation = 0;
+        let totalSegments = colorsData.length;
 
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.has('balance')) {
@@ -170,17 +168,22 @@
 
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
-        const numSegments = colorsData.length;
-        const anglePerSegment = (2 * Math.PI) / numSegments;
+        const radius = 150;
+        const segmentAngle = (2 * Math.PI) / totalSegments;
 
+        // 🎨 ዊሉን በንጽህና መሳያ ፈንክሽን
         function drawWheel() {
-            for (let i = 0; i < numSegments; i++) {
+            ctx.clearRect(0, 0, 300, 300);
+            for (let i = 0; i < totalSegments; i++) {
+                const startAngle = i * segmentAngle - Math.PI / 2; // ከመካከለኛ በላይ እንዲጀምር
+                const endAngle = startAngle + segmentAngle;
+                
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
-                ctx.arc(150, 150, 150, i * anglePerSegment, (i + 1) * anglePerSegment);
+                ctx.arc(150, 150, radius, startAngle, endAngle);
                 ctx.fillStyle = colorsData[i].code;
                 ctx.fill();
-                ctx.save();
+                ctx.stroke();
                 ctx.closePath();
             }
         }
@@ -202,14 +205,8 @@
 
         function spinWheel() {
             if (isSpinning) return;
-            if (!selectedColor) {
-                alert("እባክዎ መጀመሪያ የሚገምቱትን ቀለም ይምረጡ!");
-                return;
-            }
-            if (currentBalance < selectedBet) {
-                alert("ይቅርታ፣ በቂ ባላንስ የለዎትም!");
-                return;
-            }
+            if (!selectedColor) { alert("እባክዎ መጀመሪያ ቀለም ይምረጡ!"); return; }
+            if (currentBalance < selectedBet) { alert("በቂ ባላንስ የለዎትም!"); return; }
 
             isSpinning = true;
             document.getElementById('spin-trigger').disabled = true;
@@ -217,18 +214,19 @@
             document.getElementById('result-msg').innerHTML = "🎡 ዊሉ እየተሽከረከረ ነው... 🔄";
             document.getElementById('result-msg').style.color = "white";
 
-            // 1. መጀመሪያ ባላንሱን ቀንስ
             currentBalance -= selectedBet;
             document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
 
-            const winningIndex = Math.floor(Math.random() * numSegments);
+            // 🎯 አሸናፊውን በቀጥታ በዘፈቀደ መምረጥ
+            const winningIndex = Math.floor(Math.random() * totalSegments);
             const winningObj = colorsData[winningIndex];
 
-            // አኒሜሽን ስሌት (እንዳይዘጋና ከቆመበት ቀጥሎ እንዲሽከረከር)
-            const extraDegrees = 360 - (winningIndex * (360 / numSegments)) - (360 / numSegments / 2);
-            currentRotation += (360 * 5) + extraDegrees - (currentRotation % 360); 
+            // 📐 ፊዚክስ ማስተካከያ፦ ቀስቱ (Pointer) በትክክል ያወጣው ቀለም ላይ እንዲያርፍ ዲግሪውን ማስላት
+            const degPerSegment = 360 / totalSegments;
+            const targetDegrees = 360 - (winningIndex * degPerSegment) - (degPerSegment / 2);
+            const totalRotation = (360 * 5) + targetDegrees; // 5 ዙር ሙሉ ይዞራል
 
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
                 isSpinning = false;
@@ -240,17 +238,17 @@
                 if(isWin) {
                     let winAmount = selectedBet * winningObj.mult;
                     currentBalance += winAmount;
-                    msg = `🎉 እንኳን ደስ አለዎት! አሸንፈዋል!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💰 +${winAmount.toFixed(2)} ETB ተጨምሯል!`;
+                    msg = `🎉 እንኳን ደስ አለዎት! አሸንፈዋል!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💰 +${winAmount.toFixed(2)} ETB!`;
                     document.getElementById('result-msg').style.color = "#2ecc71";
                 } else {
-                    msg = `💔 እድል አልቀናዎትም!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💸 -${selectedBet.toFixed(2)} ETB አጥተዋል።`;
+                    msg = `💔 እድል አልቀናዎትም!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💸 -${selectedBet.toFixed(2)} ETB!`;
                     document.getElementById('result-msg').style.color = "#ff4141";
                 }
                 
                 document.getElementById('result-msg').innerHTML = msg;
                 document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
                 
-                // 🔄 ዋናው ለውጥ፦ ውጤቱን ወደ ቦቱ ይልካል ግን ዌብሳይቱን (tg.close()) አይዘጋውም!
+                // 🔄 መረጃዎችን ወደ ቦቱ መላክ
                 const liveData = {
                     bet: selectedBet,
                     chosen: selectedColor,
@@ -258,7 +256,7 @@
                     status: isWin ? "WIN" : "LOSE",
                     current_bal: currentBalance
                 };
-                tg.sendData(JSON.stringify(liveData)); 
+                tg.sendData(JSON.stringify(liveData));
 
             }, 4000);
         }
