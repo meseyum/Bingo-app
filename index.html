@@ -23,7 +23,10 @@
             display: inline-block;
             margin-bottom: 20px;
             border: 1px solid #0f3460;
+            font-size: 18px;
         }
+        #user-balance { font-weight: bold; color: #2ecc71; }
+        
         /* --- 🎡 የዊል ዲዛይን --- */
         .wheel-container {
             position: relative;
@@ -48,6 +51,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 10px #ffd700;
             transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
+        
         /* --- 🎛️ የውርርድ መቆጣጠሪያ --- */
         .bet-section, .color-section {
             background: #16213e;
@@ -72,7 +76,8 @@
             font-weight: bold;
             transition: 0.2s;
         }
-        .btn.selected { background: #ffd700; color: #1a1a2e; }
+        .btn.selected { background: #ffd700; color: #1a1a2e; box-shadow: 0 0 10px #ffd700; }
+        
         .spin-btn {
             background: linear-gradient(45deg, #ff416c, #ff4b2b);
             color: white;
@@ -84,25 +89,35 @@
             box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
             width: 80%;
             margin-top: 10px;
+            font-weight: bold;
         }
         .spin-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
-        #result-msg { font-size: 18px; font-weight: bold; margin-top: 15px; min-height: 25px; }
+        
+        /* 🔔 የውጤት ማሳያ ሰሌዳ */
+        .result-popup {
+            background: rgba(22, 33, 62, 0.95);
+            border: 2px solid #ffd700;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <h1>🎡 SUPER 2026 COIN WHEEL 🕹️</h1>
-    <div class="balance-box">💰 ባላንስዎ: <span id="user-balance">0.00</span> ETB</div>
+    <div class="balance-box">💰 ባላንስዎ: <span id="user-balance">100.00</span> ETB</div>
 
-    <!-- 🎡 የሚሽከረከረው ጎማ -->
     <div class="wheel-container">
         <div class="pointer"></div>
         <canvas id="wheel" width="300" height="300"></canvas>
     </div>
 
-    <div id="result-msg"></div>
+    <div id="result-box" class="result-popup">
+        <div id="result-msg" style="font-size: 18px; font-weight: bold;"></div>
+    </div>
 
-    <!-- 💰 የውርርድ መጠን መምረጫ -->
     <div class="bet-section">
         <label>💵 የውርርድ መጠን ይምረጡ፦</label>
         <div class="grid-buttons">
@@ -113,7 +128,6 @@
         </div>
     </div>
 
-    <!-- 🎨 የ 20ቱ ቀለሞች መምረጫ -->
     <div class="color-section">
         <label>🎯 የሚወጣውን ቀለም ይገምቱ (20 ቀለማት)፦</label>
         <div class="grid-buttons" id="color-grid"></div>
@@ -123,40 +137,37 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ሙሉ ስክሪን እንዲሆን
+        tg.expand();
 
-        // የ 20ቱ ቀለሞች ዝርዝር ከነ ከለር ኮዳቸው
         const colorsData = [
-            { name: "ቀይ", code: "#ff4141" }, { name: "ጥቁር", code: "#2d2d2d" }, { name: "ሰማያዊ", code: "#3498db" }, { name: "ቢጫ", code: "#f1c40f" }, { name: "አረንጓዴ", code: "#2ecc71" },
-            { name: "ቫዮሌት", code: "#9b59b6" }, { name: "ብርቱካን", code: "#e67e22" }, { name: "ሮዝ", code: "#e84393" }, { name: "ነጭ", code: "#ffffff" }, { name: "ግራጫ", code: "#7f8c8d" },
-            { name: "ወርቅ", code: "#ffd700" }, { name: "बुናማ", code: "#8b5a2b" }, { name: "ቱርኩዋዝ", code: "#1abc9c" }, { name: "ሊላክ", code: "#a29bfe" }, { name: "ሜጀንታ", code: "#fd79a8" },
-            { name: "ሳይያን", code: "#00cec9" }, { name: "ኢንዲగో", code: "#30336b" }, { name: "ሊም", code: "#badc58" }, { name: "ፒች", code: "#ffbe76" }, { name: "ቻርኮል", code: "#353b48" }
+            { name: "ቀይ", code: "#ff4141", mult: 2 }, { name: "ጥቁር", code: "#2d2d2d", mult: 2 }, { name: "ሰማያዊ", code: "#3498db", mult: 3 }, { name: "ቢጫ", code: "#f1c40f", mult: 3 }, { name: "አረንጓዴ", code: "#2ecc71", mult: 5 },
+            { name: "ቫዮሌት", code: "#9b59b6", mult: 5 }, { name: "ብርቱካን", code: "#e67e22", mult: 4 }, { name: "ሮዝ", code: "#e84393", mult: 4 }, { name: "ነጭ", code: "#ffffff", mult: 10 }, { name: "ግራጫ", code: "#7f8c8d", mult: 2 },
+            { name: "ወርቅ", code: "#ffd700", mult: 20 }, { name: "ቡናማ", code: "#8b5a2b", mult: 3 }, { name: "ቱርኩዋዝ", code: "#1abc9c", mult: 6 }, { name: "ሊላክ", code: "#a29bfe", mult: 7 }, { name: "ሜጀንታ", code: "#fd79a8", mult: 8 },
+            { name: "ሳይያን", code: "#00cec9", mult: 4 }, { name: "ኢንዲగో", code: "#30336b", mult: 5 }, { name: "ሊም", code: "#badc58", mult: 9 }, { name: "ፒች", code: "#ffbe76", mult: 12 }, { name: "ቻርኮል", code: "#353b48", mult: 15 }
         ];
 
-        let currentBalance = 100.00; // መነሻ (ከቦቱ በራስ ሰር ይዘመናል)
+        let currentBalance = 100.00;
         let selectedBet = 10;
         let selectedColor = "";
         let isSpinning = false;
+        let currentRotation = 0;
 
-        // URL ላይ ያለውን ባላንስ ማንበቢያ
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.has('balance')) {
             currentBalance = parseFloat(urlParams.get('balance'));
         }
         document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
 
-        // ቀለማቱን በኪቦርድ መልክ መፍጠሪያ
         const colorGrid = document.getElementById('color-grid');
         colorsData.forEach(c => {
             const btn = document.createElement('button');
             btn.className = 'btn color-btn';
             btn.style.borderBottom = `4px solid ${c.code}`;
-            btn.innerText = c.name;
+            btn.innerText = `${c.name} (${c.mult}X)`;
             btn.onclick = () => selectColor(c.name, btn);
             colorGrid.appendChild(btn);
         });
 
-        // ዊሉን በፈጠራ መሳያ (Canvas)
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const numSegments = colorsData.length;
@@ -189,7 +200,6 @@
             selectedColor = colorName;
         }
 
-        // 🎡 የዊል ማሽከርከሪያ ዋና ሎጂክ
         function spinWheel() {
             if (isSpinning) return;
             if (!selectedColor) {
@@ -203,35 +213,54 @@
 
             isSpinning = true;
             document.getElementById('spin-trigger').disabled = true;
-            document.getElementById('result-msg').innerText = "🎡 ዊሉ በከፍተኛ ፍጥነት እየተሽከረከረ ነው... 🔄";
+            document.getElementById('result-box').style.display = "block";
+            document.getElementById('result-msg').innerHTML = "🎡 ዊሉ እየተሽከረከረ ነው... 🔄";
+            document.getElementById('result-msg').style.color = "white";
 
-            // ውጤቱን በዘፈቀደ መምረጥ
+            // 1. መጀመሪያ ባላንሱን ቀንስ
+            currentBalance -= selectedBet;
+            document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
+
             const winningIndex = Math.floor(Math.random() * numSegments);
-            const winningColor = colorsData[winningIndex].name;
+            const winningObj = colorsData[winningIndex];
 
-            // አኒሜሽኑ የሚቆምበትን ዲግሪ ማስላት (360 ዲግሪ * 5 ዙር + ወደ ከለሩ መድረሻ)
+            // አኒሜሽን ስሌት (እንዳይዘጋና ከቆመበት ቀጥሎ እንዲሽከረከር)
             const extraDegrees = 360 - (winningIndex * (360 / numSegments)) - (360 / numSegments / 2);
-            const totalRotation = (360 * 5) + extraDegrees; 
+            currentRotation += (360 * 5) + extraDegrees - (currentRotation % 360); 
 
-            canvas.style.transform = `rotate(${totalRotation}deg)`;
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
 
             setTimeout(() => {
                 isSpinning = false;
                 document.getElementById('spin-trigger').disabled = false;
                 
-                let isWin = (selectedColor === winningColor);
+                let isWin = (selectedColor === winningObj.name);
+                let msg = "";
                 
-                // ወደ ቴሌግራም ቦቱ ውጤቱን መላክ
-                const gameResult = {
+                if(isWin) {
+                    let winAmount = selectedBet * winningObj.mult;
+                    currentBalance += winAmount;
+                    msg = `🎉 እንኳን ደስ አለዎት! አሸንፈዋል!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💰 +${winAmount.toFixed(2)} ETB ተጨምሯል!`;
+                    document.getElementById('result-msg').style.color = "#2ecc71";
+                } else {
+                    msg = `💔 እድል አልቀናዎትም!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💸 -${selectedBet.toFixed(2)} ETB አጥተዋል።`;
+                    document.getElementById('result-msg').style.color = "#ff4141";
+                }
+                
+                document.getElementById('result-msg').innerHTML = msg;
+                document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
+                
+                // 🔄 ዋናው ለውጥ፦ ውጤቱን ወደ ቦቱ ይልካል ግን ዌብሳይቱን (tg.close()) አይዘጋውም!
+                const liveData = {
                     bet: selectedBet,
                     chosen: selectedColor,
-                    won: winningColor,
-                    status: isWin ? "WIN" : "LOSE"
+                    won: winningObj.name,
+                    status: isWin ? "WIN" : "LOSE",
+                    current_bal: currentBalance
                 };
-                
-                tg.sendData(JSON.stringify(gameResult)); // ውጤቱን ወደ ቦቱ ያስተላልፋል
-                tg.close(); // ዌብ አፑን ይዘጋዋል
-            }, 4000); // 4 ሰከንድ አኒሜሽን
+                tg.sendData(JSON.stringify(liveData)); 
+
+            }, 4000);
         }
     </script>
 </body>
