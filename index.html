@@ -6,99 +6,20 @@
     <title>Super 2026 Coin Wheel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: #1a1a2e;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        h1 { color: #ffd700; margin-bottom: 5px; font-size: 24px; }
-        .balance-box {
-            background: #16213e;
-            padding: 10px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-bottom: 20px;
-            border: 1px solid #0f3460;
-            font-size: 18px;
-        }
+        body { background-color: #1a1a2e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        h1 { color: #ffd700; font-size: 22px; }
+        .balance-box { background: #16213e; padding: 10px; border-radius: 10px; display: inline-block; margin-bottom: 20px; border: 1px solid #0f3460; }
         #user-balance { font-weight: bold; color: #2ecc71; }
-        
-        .wheel-container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 0 auto 20px auto;
-        }
-        .pointer {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 25px solid #ff4141;
-            z-index: 10;
-        }
-        canvas {
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 10px #ffd700;
-            transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        
-        .bet-section, .color-section {
-            background: #16213e;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .btn {
-            background: #0f3460;
-            color: white;
-            border: none;
-            padding: 10px 5px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .btn.selected { background: #ffd700; color: #1a1a2e; box-shadow: 0 0 10px #ffd700; }
-        
-        .spin-btn {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            color: white;
-            font-size: 18px;
-            padding: 12px 40px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
-            width: 80%;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .spin-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
-        
-        .result-popup {
-            background: rgba(22, 33, 62, 0.95);
-            border: 2px solid #ffd700;
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 15px;
-            display: none;
-        }
+        .wheel-container { position: relative; width: 300px; height: 300px; margin: 0 auto 20px auto; }
+        .pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ff4141; z-index: 10; }
+        canvas { border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1); }
+        .bet-section, .color-section { background: #16213e; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+        .grid-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .btn { background: #0f3460; color: white; border: none; padding: 10px 5px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .btn.selected { background: #ffd700; color: #1a1a2e; box-shadow: 0 0 8px #ffd700; }
+        .spin-btn { background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white; font-size: 18px; padding: 12px; border-radius: 30px; border: none; cursor: pointer; width: 80%; font-weight: bold; margin-top: 10px; }
+        .spin-btn:disabled { background: #555; }
+        .result-popup { background: rgba(22, 33, 62, 0.95); border: 2px solid #ffd700; padding: 15px; border-radius: 15px; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -126,7 +47,7 @@
     </div>
 
     <div class="color-section">
-        <label>🎯 የሚወጣውን ቀለም ይገምቱ (20 ቀለማት)፦</label>
+        <label>🎯 የሚወጣውን ቀለም ይገምቱ፦</label>
         <div class="grid-buttons" id="color-grid"></div>
     </div>
 
@@ -136,7 +57,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ⚠️ ቀለማቱ በትክክል በክበብ ቅርጽ እንዲሳሉ ቅደም ተከተላቸው ተስተካክሏል
+        // 🎨 20 ቀለማት በትክክል በክበብ ቅደም ተከተል (ከካንቫስ ጋር የተገጣጠመ)
         const colorsData = [
             { name: "ቀይ", code: "#ff4141", mult: 2 }, { name: "ጥቁር", code: "#2d2d2d", mult: 2 }, { name: "ሰማያዊ", code: "#3498db", mult: 3 }, { name: "ቢጫ", code: "#f1c40f", mult: 3 }, { name: "አረንጓዴ", code: "#2ecc71", mult: 5 },
             { name: "ቫዮሌት", code: "#9b59b6", mult: 5 }, { name: "ብርቱካን", code: "#e67e22", mult: 4 }, { name: "ሮዝ", code: "#e84393", mult: 4 }, { name: "ነጭ", code: "#ffffff", mult: 10 }, { name: "ግራጫ", code: "#7f8c8d", mult: 2 },
@@ -148,12 +69,11 @@
         let selectedBet = 10;
         let selectedColor = "";
         let isSpinning = false;
-        let totalSegments = colorsData.length;
+        const totalSegments = colorsData.length;
+        const segmentAngle = (2 * Math.PI) / totalSegments;
 
         const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('balance')) {
-            currentBalance = parseFloat(urlParams.get('balance'));
-        }
+        if(urlParams.has('balance')) { currentBalance = parseFloat(urlParams.get('balance')); }
         document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
 
         const colorGrid = document.getElementById('color-grid');
@@ -161,52 +81,32 @@
             const btn = document.createElement('button');
             btn.className = 'btn color-btn';
             btn.style.borderBottom = `4px solid ${c.code}`;
-            btn.innerText = `${c.name} (${c.mult}X)`;
-            btn.onclick = () => selectColor(c.name, btn);
+            btn.innerText = `${c.name}`;
+            btn.onclick = () => { if(!isSpinning) { document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); selectedColor = c.name; }};
             colorGrid.appendChild(btn);
         });
 
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
-        const radius = 150;
-        const segmentAngle = (2 * Math.PI) / totalSegments;
 
-        // 🎨 ዊሉን በንጽህና መሳያ ፈንክሽን
         function drawWheel() {
             ctx.clearRect(0, 0, 300, 300);
             for (let i = 0; i < totalSegments; i++) {
-                const startAngle = i * segmentAngle - Math.PI / 2; // ከመካከለኛ በላይ እንዲጀምር
-                const endAngle = startAngle + segmentAngle;
-                
+                const angle = i * segmentAngle - Math.PI / 2;
                 ctx.beginPath();
                 ctx.moveTo(150, 150);
-                ctx.arc(150, 150, radius, startAngle, endAngle);
+                ctx.arc(150, 150, 145, angle, angle + segmentAngle);
                 ctx.fillStyle = colorsData[i].code;
                 ctx.fill();
                 ctx.stroke();
-                ctx.closePath();
             }
         }
         drawWheel();
 
-        function selectBet(amount, btn) {
-            if(isSpinning) return;
-            document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedBet = amount;
-        }
-
-        function selectColor(colorName, btn) {
-            if(isSpinning) return;
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedColor = colorName;
-        }
+        function selectBet(amount, btn) { if(!isSpinning) { document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); selectedBet = amount; }}
 
         function spinWheel() {
-            if (isSpinning) return;
-            if (!selectedColor) { alert("እባክዎ መጀመሪያ ቀለም ይምረጡ!"); return; }
-            if (currentBalance < selectedBet) { alert("በቂ ባላንስ የለዎትም!"); return; }
+            if (isSpinning || !selectedColor || currentBalance < selectedBet) return;
 
             isSpinning = true;
             document.getElementById('spin-trigger').disabled = true;
@@ -217,47 +117,39 @@
             currentBalance -= selectedBet;
             document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
 
-            // 🎯 አሸናፊውን በቀጥታ በዘፈቀደ መምረጥ
             const winningIndex = Math.floor(Math.random() * totalSegments);
             const winningObj = colorsData[winningIndex];
 
-            // 📐 ፊዚክስ ማስተካከያ፦ ቀስቱ (Pointer) በትክክል ያወጣው ቀለም ላይ እንዲያርፍ ዲግሪውን ማስላት
+            // 📐 ፍጹም የቆጠራ ስሌት (ቀስቱ ልክ ያንን ቀለም እንዲጠቁም)
             const degPerSegment = 360 / totalSegments;
             const targetDegrees = 360 - (winningIndex * degPerSegment) - (degPerSegment / 2);
-            const totalRotation = (360 * 5) + targetDegrees; // 5 ዙር ሙሉ ይዞራል
+            const totalRotation = (360 * 6) + targetDegrees; 
 
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
                 isSpinning = false;
                 document.getElementById('spin-trigger').disabled = false;
-                
                 let isWin = (selectedColor === winningObj.name);
-                let msg = "";
                 
                 if(isWin) {
-                    let winAmount = selectedBet * winningObj.mult;
-                    currentBalance += winAmount;
-                    msg = `🎉 እንኳን ደስ አለዎት! አሸንፈዋል!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💰 +${winAmount.toFixed(2)} ETB!`;
+                    currentBalance += (selectedBet * winningObj.mult);
+                    document.getElementById('result-msg').innerHTML = `🎉 አሸንፈዋል!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}`;
                     document.getElementById('result-msg').style.color = "#2ecc71";
                 } else {
-                    msg = `💔 እድል አልቀናዎትም!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}<br>💸 -${selectedBet.toFixed(2)} ETB!`;
+                    document.getElementById('result-msg').innerHTML = `💔 ተሸንፈዋል!<br>🎯 ምርጫዎ: ${selectedColor}<br>🎡 የወጣው: ${winningObj.name}`;
                     document.getElementById('result-msg').style.color = "#ff4141";
                 }
-                
-                document.getElementById('result-msg').innerHTML = msg;
                 document.getElementById('user-balance').innerText = currentBalance.toFixed(2);
                 
-                // 🔄 መረጃዎችን ወደ ቦቱ መላክ
-                const liveData = {
+                // 🔄 መረጃ ወደ ፓይተን መላኪያ
+                tg.sendData(JSON.stringify({
                     bet: selectedBet,
                     chosen: selectedColor,
                     won: winningObj.name,
                     status: isWin ? "WIN" : "LOSE",
                     current_bal: currentBalance
-                };
-                tg.sendData(JSON.stringify(liveData));
-
+                }));
             }, 4000);
         }
     </script>
