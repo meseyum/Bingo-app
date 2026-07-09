@@ -18,7 +18,6 @@
             border-radius: 50%; 
             box-shadow: 0 0 20px rgba(0,0,0,0.5); 
             will-change: transform;
-            /* 🔄 አኒሜሽኑን ሁልጊዜ ተመሳሳይና ቋሚ ፍጥነት እንዲኖረው የሚያደርግ */
             transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         
@@ -56,7 +55,7 @@
     </div>
 
     <div class="color-section">
-        <label>🎯 የሚወጣውን ቀለም ይገምቱ፦</label>
+        <label>🎯 የሚወጣውን ቀለም ይገምቱ (20 ቀለማት)፦</label>
         <div class="grid-buttons" id="color-grid"></div>
     </div>
 
@@ -66,20 +65,19 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // 🎯 ልክ አንተ እንዳልከው 20 እውነተኛ ቀለማት በትክክል ተደርድረዋል!
         const colorsData = [
             { name: "ቀይ", code: "#ff4141", mult: 2 }, { name: "ጥቁር", code: "#2d2d2d", mult: 2 }, { name: "ሰማያዊ", code: "#3498db", mult: 3 }, { name: "ቢጫ", code: "#f1c40f", mult: 3 }, { name: "አረንጓዴ", code: "#2ecc71", mult: 5 },
-            { name: "👑ወርቅ", code: "#ffd700", mult: 20 }, { name: "ብርቱካን", code: "#e67e22", mult: 4 }, { name: "ሮዝ", code: "#e84393", mult: 4 }, { name: "ነጭ", code: "#ffffff", mult: 10 }, { name: "ግራጫ", code: "#7f8c8d", mult: 2 },
-            { name: "ቡናማ", code: "#8b5a2b", mult: 3 }, { name: "ቱርኩዋዝ", code: "#1abc9c", mult: 6 }, { name: "ሊላክ", code: "#a29bfe", mult: 7 }, { name: "ሜጀንታ", code: "#fd79a8", mult: 8 }, { name: "ሳይያን", code: "#00cec9", mult: 4 }
+            { name: "ቫዮሌት", code: "#9b59b6", mult: 5 }, { name: "ብርቱካን", code: "#e67e22", mult: 4 }, { name: "ሮዝ", code: "#e84393", mult: 4 }, { name: "ነጭ", code: "#ffffff", mult: 10 }, { name: "ግራጫ", code: "#7f8c8d", mult: 2 },
+            { name: "ወርቅ", code: "#ffd700", mult: 20 }, { name: "ቡናማ", code: "#8b5a2b", mult: 3 }, { name: "ቱርኩዋዝ", code: "#1abc9c", mult: 6 }, { name: "ሊላክ", code: "#a29bfe", mult: 7 }, { name: "ሜጀንታ", code: "#fd79a8", mult: 8 },
+            { name: "ሳይያን", code: "#00cec9", mult: 4 }, { name: "ኢንዲጎ", code: "#30336b", mult: 5 }, { name: "ሊም", code: "#badc58", mult: 9 }, { name: "ፒች", code: "#ffbe76", mult: 12 }, { name: "ቻርኮል", code: "#353b48", mult: 15 }
         ];
 
         let currentBalance = 100.00;
         let selectedBet = 10;
         let selectedColor = "";
         let isSpinning = false;
-        
-        // 🔄 ለእያንዳንዱ ዙር አዲስ ዲግሪ ለመጨመር የሚያገለግል ተለዋዋጭ
         let currentRotation = 0; 
-        
         const totalSegments = colorsData.length;
         const segmentAngle = (2 * Math.PI) / totalSegments;
 
@@ -109,7 +107,7 @@
                 ctx.arc(150, 150, 145, angle, angle + segmentAngle);
                 ctx.fillStyle = colorsData[i].code;
                 ctx.fill();
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1.5;
                 ctx.strokeStyle = "#1a1a2e";
                 ctx.stroke();
             }
@@ -136,8 +134,8 @@
             const degPerSegment = 360 / totalSegments;
             const targetDegrees = 360 - (winningIndex * degPerSegment) - (degPerSegment / 2);
             
-            // 🔥 [ዋናው መፍትሔ]፦ ዲግሪውን ወደ ኋላ ሳይመልስ ካለበት ላይ በየዙሩ (360 * 6) በቋሚነት ይጨምራል!
-            currentRotation += (360 * 6) + targetDegrees - (currentRotation % 360); 
+            // 🔄 ሁልጊዜ ካለበት ተነስቶ በቋሚነት ቩውውው ብሎ እንዲሽከረከር ማድረጊያ
+            currentRotation += (360 * 7) + targetDegrees - (currentRotation % 360); 
 
             canvas.style.transform = `rotate(${currentRotation}deg)`;
 
