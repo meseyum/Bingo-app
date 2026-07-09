@@ -148,9 +148,8 @@
         <div class="btn bet-btn" onclick="selectBet(200, this)">200 ETB</div>
     </div>
 
-    <div class="section-title">🎯 የሚወጣውን ቀለም ይገምቱ (20 ቀለማት)፦</div>
-    <div class="grid-container" id="color-grid">
-        </div>
+    <div class="section-title">🎯 የሚወጣውን ቀለም ይገምቱ፦</div>
+    <div class="grid-container" id="color-grid"></div>
 
     <div class="grid-container">
         <button class="btn spin-btn" onclick="spinWheel()">🎡 አሽከርክር (SPIN)</button>
@@ -159,47 +158,37 @@
     <div id="result" class="result-box"></div>
 
     <script>
-        // 🔗 የቴሌግራም ሊንክ ዳታዎችን መሰብሰብ
+        // 🔗 ቴሌግራም ዌብአፕን ማስነሳት
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if(tg) tg.expand(); // ስክሪኑን ሙሉ ማድረግ
+
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user_id') || "123456789"; 
-        // ከቦቱ የመጣ ባላንስ ካለ እሱን ይወስዳል፣ ከሌለ መነሻውን 95.00 ያደርጋል
         let currentBalance = parseFloat(urlParams.get('balance')) || 95.00;
-
-        // የ Pydroid 3 ቦትህ የሚገኝበት የአገልጋይ አድራሻ (አይፒ ቁጥርህ)
-        const PYDROID_SERVER_URL = "http://127.0.0.1:8080/update_balance"; 
 
         document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
 
-        // 🎨 20 ቀለማት ዝርዝር በአማርኛ ስማቸው
         const colorsData = [
             { name: "ቀይ", hex: "#e74c3c" }, { name: "ጥቁር", hex: "#2d3436" }, 
             { name: "ሰማያዊ", hex: "#0984e3" }, { name: "ቢጫ", hex: "#f1c40f" },
-            { name: "አረንጓዴ", hex: "#2ecc71" }, { name: "purple", hex: "#9b59b6" }, 
-            { name: "ብርቱካን", hex: "#e67e22" }, { name: "ሮዝ", hex: "#fd79a8" },
-            { name: "ፈዛዛ ሰማያዊ", hex: "#74b9ff" }, { name: "ጥቁር ሰማያዊ", hex: "#2c3e50" }, 
-            { name: "አረንጓዴ ገላ", hex: "#55efc4" }, { name: "ቡኒ", hex: "#8c7ae6" },
-            { name: "ወርቃማ", hex: "#e1b12c" }, { name: "አመድማ", hex: "#7f8c8d" }, 
-            { name: "ነጭ", hex: "#ffffff" }, { name: "ወይን ጠጅ", hex: "#6c5ce7" },
-            { name: "የቆዳ ቀለም", hex: "#fab1a0" }, { name: "ፈዛዛ አረንጓዴ", hex: "#a29bfe" },
-            { name: "ደማቅ ቀይ", hex: "#ch-red" }, { name: "ባህር ሰማያዊ", hex: "#00cec9" }
+            { name: "አረንጓዴ", hex: "#2ecc71" }, { name: "ሐምራዊ", hex: "#9b59b6" }, 
+            { name: "ብርቱካን", hex: "#e67e22" }, { name: "ሮዝ", hex: "#fd79a8" }
         ];
 
         let selectedBetAmount = 10;
         let selectedColorName = "";
         let isSpinning = false;
 
-        // 🏗️ ቀለማቱን በስክሪኑ ላይ መደርደር
         const colorGrid = document.getElementById('color-grid');
-        colorsData.slice(0, 8).forEach(c => { 
+        colorsData.forEach(c => { 
             const div = document.createElement('div');
             div.className = "btn color-btn";
             div.innerText = c.name;
-            div.style.borderBottom = `4px solid ${c.hex === '#ffffff' ? '#ccc' : c.hex}`;
+            div.style.borderBottom = `4px solid ${c.hex}`;
             div.onclick = function() { selectColor(c.name, this); };
             colorGrid.appendChild(div);
         });
 
-        // 🎡 የሩሌት ጎማውን በ Canvas መሳል
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const numSegments = colorsData.length;
@@ -231,22 +220,6 @@
             selectedColorName = colorName;
         }
 
-        // 🔄 አዲሱን ባላንስ ወደ ቴሌግራም ቦት ሰርቨር መላኪያ ፈንክሽን
-        function sendBalanceToBot(newBalance) {
-            fetch(PYDROID_SERVER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: parseInt(userId),
-                    current_bal: parseFloat(newBalance)
-                })
-            })
-            .then(response => response.json())
-            .then(data => console.log("ዳታቤዝ ተዘምኗል:", data))
-            .catch(err => console.error("ወደ ቦቱ መላክ አልተቻለም:", err));
-        }
-
-        // 🚀 ጎማውን የማሽከርከር ስራ
         function spinWheel() {
             if (isSpinning) return;
             if (!selectedColorName) {
@@ -254,23 +227,20 @@
                 return;
             }
             if (currentBalance < selectedBetAmount) {
-                alert("ይቅርታ፣ በቂ ባላንስ የለዎትም! እባክዎ ዴፖዚት ያድርጉ።");
+                alert("ይቅርታ፣ በቂ ባላንስ የለዎትም!");
                 return;
             }
 
             isSpinning = true;
-            currentBalance -= selectedBetAmount; // ውርርዱን ወዲያው መቀነስ
+            currentBalance -= selectedBetAmount; 
             document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
-            sendBalanceToBot(currentBalance); // የተቀነሰውን ባላንስ ወዲያው መቆጠብ
 
             const resultBox = document.getElementById('result');
             resultBox.style.display = "none";
 
-            // በዘፈቀደ የሚወጣ ቀለም መምረጥ
             const winningIndex = Math.floor(Math.random() * numSegments);
             const winningColor = colorsData[winningIndex];
 
-            // የማሽከርከሪያ ዲግሪ ማስላት
             const extraSpins = 5 * 360; 
             const targetAngle = (numSegments - winningIndex - 0.5) * (360 / numSegments);
             const totalRotation = extraSpins + targetAngle;
@@ -283,9 +253,9 @@
                 canvas.style.transform = `rotate(${targetAngle}deg)`;
                 setTimeout(() => { canvas.style.transition = "transform 4s cubic-bezier(0.1, 0.8, 0.2, 1)"; }, 50);
 
-                // ማሸነፍ ወይም መሸነፉን ማረጋገጥ
-                if (selectedColorName === winningColor.name) {
-                    const winAmount = selectedBetAmount * 3; // ለቀለም ግምት 3 እጥፍ ክፍያ
+                let isWin = (selectedColorName === winningColor.name);
+                if (isWin) {
+                    const winAmount = selectedBetAmount * 3; 
                     currentBalance += winAmount;
                     resultBox.className = "result-box win";
                     resultBox.innerHTML = `🎉 አሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው: ${winningColor.name}<br>🎁 +${winAmount} ETB`;
@@ -297,13 +267,10 @@
                 document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
                 resultBox.style.display = "block";
                 
-                // 🔄 ያሸነፈውን ወይም የተሸነፈበትን የመጨረሻ ባላንስ ወደ ቦቱ መላክ
-                sendBalanceToBot(currentBalance);
-
-                // ለቴሌግራም ቦት ውጤቱን ማሳወቅ
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.sendData(JSON.stringify({
-                        status: selectedColorName === winningColor.name ? "win" : "lose",
+                // 🔥 ቴሌግራም በሚዘጋበት ጊዜ ዳታው ወዲያው ለቦቱ እንዲተላለፍ በ `sendData` መላክ
+                if (tg) {
+                    tg.sendData(JSON.stringify({
+                        status: isWin ? "win" : "lose",
                         chosen: selectedColorName,
                         rolled: winningColor.name,
                         new_balance: currentBalance
