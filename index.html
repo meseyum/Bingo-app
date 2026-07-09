@@ -88,11 +88,8 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
             transition: all 0.3s;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         .btn.active {
             background-color: #f1c40f;
@@ -140,7 +137,7 @@
 
     <div class="wheel-outer">
         <div class="pointer"></div>
-        <canvas id="wheel" width="500" height="500"></canvas>
+        <canvas id="wheel" width="400" height="400"></canvas>
     </div>
 
     <div class="section-title">💵 የውርርድ መጠን ይምረጡ፦</div>
@@ -151,7 +148,7 @@
         <div class="btn bet-btn" onclick="selectBet(200, this)">200 ETB</div>
     </div>
 
-    <div class="section-title">🎯 የሚወጣውን ቀለም ይገምቱ (20 ቀለማት)፦</div>
+    <div class="section-title">🎯 የሚወጣውን ቀለም ይገምቱ (8 ቀለማት)፦</div>
     <div class="grid-container" id="color-grid"></div>
 
     <div class="grid-container">
@@ -170,47 +167,38 @@
 
         document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
 
-        // 🎨 በፎቶው ላይ ያሉት 20 ሙሉ ቀለማት በቅደም ተከተል
+        // 🎨 ልክ እንደ ፎቶው 8ቱ ቀለማት ብቻ
         const colorsData = [
             { name: "ቀይ", hex: "#e74c3c" }, { name: "ጥቁር", hex: "#2c3e50" }, 
             { name: "ሰማያዊ", hex: "#2980b9" }, { name: "ቢጫ", hex: "#f1c40f" },
             { name: "አረንጓዴ", hex: "#2ecc71" }, { name: "ሐምራዊ", hex: "#9b59b6" }, 
-            { name: "ብርቱካን", hex: "#e67e22" }, { name: "ሮዝ", hex: "#e84393" },
-            { name: "ነጭ", hex: "#ffffff" }, { name: "አመድማ", hex: "#7f8c8d" },
-            { name: "ቡኒ", hex: "#8e44ad" }, { name: "ፈዛዛ ቀይ", hex: "#ff7675" },
-            { name: "ባህር ሰማያዊ", hex: "#00cec9" }, { name: "ወርቃማ", hex: "#d35400" },
-            { name: "ቆዳ ቀለም", hex: "#fab1a0" }, { name: "ፈዛዛ አረንጓዴ", hex: "#55efc4" },
-            { name: "ደማቅ ሰማያዊ", hex: "#0984e3" }, { name: "ፈዛዛ ቢጫ", hex: "#ffeaa7" },
-            { name: "ወይን ጠጅ", hex: "#6c5ce7" }, { name: "ጥቁር አረንጓዴ", hex: "#27ae60" }
+            { name: "ብርቱካን", hex: "#e67e22" }, { name: "ሮዝ", hex: "#e84393" }
         ];
 
         let selectedBetAmount = 10;
         let selectedColorName = "";
         let isSpinning = false;
 
-        // የ 20 ቀለማት በተኖችን መፍጠር
         const colorGrid = document.getElementById('color-grid');
         colorsData.forEach(c => { 
             const div = document.createElement('div');
             div.className = "btn color-btn";
             div.innerText = c.name;
-            div.style.borderBottom = `4px solid ${c.hex === '#ffffff' ? '#ccc' : c.hex}`;
+            div.style.borderBottom = `4px solid ${c.hex}`;
             div.onclick = function() { selectColor(c.name, this); };
             colorGrid.appendChild(div);
         });
 
-        // የ 20 ቀለማት ሩሌት መሳል
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const numSegments = colorsData.length;
         const anglePerSegment = (2 * Math.PI) / numSegments;
 
         function drawWheel() {
-            ctx.clearRect(0, 0, 500, 500);
             for (let i = 0; i < numSegments; i++) {
                 ctx.beginPath();
-                ctx.moveTo(250, 250);
-                ctx.arc(250, 250, 240, i * anglePerSegment, (i + 1) * anglePerSegment);
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 190, i * anglePerSegment, (i + 1) * anglePerSegment);
                 ctx.fillStyle = colorsData[i].hex;
                 ctx.fill();
                 ctx.lineWidth = 2;
@@ -255,7 +243,7 @@
             const winningIndex = Math.floor(Math.random() * numSegments);
             const winningColor = colorsData[winningIndex];
 
-            const extraSpins = 6 * 360; 
+            const extraSpins = 5 * 360; 
             const targetAngle = (numSegments - winningIndex - 0.5) * (360 / numSegments);
             const totalRotation = extraSpins + targetAngle;
 
@@ -269,7 +257,7 @@
 
                 let isWin = (selectedColorName === winningColor.name);
                 if (isWin) {
-                    const winAmount = selectedBetAmount * 15; // 20 ቀለም ስለሆነ የማሸነፍ እድሉ ጠባብ ስለሆነ 15 እጥፍ ያደርገዋል
+                    const winAmount = selectedBetAmount * 5; // 8 ቀለም ስለሆነ ካሸነፈ 5 እጥፍ ያገኛል
                     currentBalance += winAmount;
                     resultBox.className = "result-box win";
                     resultBox.innerHTML = `🎉 አሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው: ${winningColor.name}<br>🎁 +${winAmount} ETB`;
@@ -281,7 +269,7 @@
                 document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
                 resultBox.style.display = "block";
                 
-                // 🔄 ቴሌግራም አፑ ሲዘጋ ዳታው ወደ ቦቱ እንዲላክ በ Telegram WebApp sendData መላክ
+                // 🔄 ተጫዋቹ ጨዋታውን ሲዘጋ ባላንሱ ወዲያው ለቦቱ እንዲተላለፍ ማድረግ
                 if (tg) {
                     tg.sendData(JSON.stringify({
                         status: isWin ? "win" : "lose",
