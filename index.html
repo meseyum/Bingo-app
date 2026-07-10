@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER 2026 COIN WHEEL (FIXED)</title>
+    <title>SUPER 2026 COIN WHEEL (PERFECT POINTER)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -147,7 +147,7 @@
     <div class="grid-container">
         <div class="btn bet-btn active" onclick="selectBet(10, this)">10 ETB</div>
         <div class="btn bet-btn" onclick="selectBet(50, this)">50 ETB</div>
-        <div class="btn bet-btn" onclick="selectBet(100, this).">100 ETB</div>
+        <div class="btn bet-btn" onclick="selectBet(100, this)">100 ETB</div>
         <div class="btn bet-btn" onclick="selectBet(200, this)">200 ETB</div>
     </div>
 
@@ -169,7 +169,6 @@
 
         document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
 
-        // 🎨 በፎቶው ላይ ያሉትን 10 ተደጋጋሚ ቀለማት ለ 20 ቁጥሮች ማደል
         const baseColors = ["#e74c3c", "#2c3e50", "#2980b9", "#f1c40f", "#2ecc71", "#9b59b6", "#e67e22", "#e84393", "#1abc9c", "#16a085"];
         const colorsData = [];
         for (let i = 1; i <= 20; i++) {
@@ -182,7 +181,7 @@
         let selectedBetAmount = 10;
         let selectedColorName = "";
         let isSpinning = false;
-        let currentRotation = 0; // የተጠራቀመ ዲግሪ ለመያዝ
+        let totalRotation = 0; 
 
         const colorGrid = document.getElementById('color-grid');
         colorsData.forEach(c => { 
@@ -204,7 +203,8 @@
             for (let i = 0; i < numSegments; i++) {
                 ctx.beginPath();
                 ctx.moveTo(250, 250);
-                // ዊሉ ሲሳል ከመሃል በላይ (ቀስቱ ካለበት -90 ዲግሪ) ጀምሮ እንዲሆን
+                
+                // ቁጥር 1 ልክ ከላይ መሃል (-90 ዲግሪ) ላይ እንዲጀምር
                 let startAngle = (i * anglePerSegment) - (Math.PI / 2);
                 let endAngle = ((i + 1) * anglePerSegment) - (Math.PI / 2);
                 
@@ -215,7 +215,6 @@
                 ctx.strokeStyle = "#131927";
                 ctx.stroke();
 
-                // ቁጥሮቹን መጻፍ
                 ctx.save();
                 ctx.translate(250, 250);
                 ctx.rotate(startAngle + anglePerSegment / 2);
@@ -260,31 +259,36 @@
             const resultBox = document.getElementById('result');
             resultBox.style.display = "none";
 
-            // 🎯 አስቀድመን አሸናፊውን ኢንዴክስ እንመርጣለን (0 እስከ 19)
-            const winningIndex = Math.floor(Math.random() * numSegments);
-            const winningColor = colorsData[winningIndex];
+            // 🔄 በዘፈቀደ የሚሽከረከር ዲግሪ (ቢያንስ 5 ዙር እንዲዞር)
+            const randomDegrees = Math.floor(Math.random() * 360);
+            totalRotation += 1800 + randomDegrees; 
 
-            // 🔄 በትክክል ቀስቱ ላይ እንዲቆም የሚያደርግ የዲግሪ ስሌት
-            const segmentDegrees = 360 / numSegments;
-            const targetDegrees = 360 - (winningIndex * segmentDegrees) - (segmentDegrees / 2);
-            
-            // የቆየውን ዙር ላይ ጨምረን 6 ሙሉ ዙር (2160 ዲግሪ) እናሽከረክረዋለን
-            currentRotation = (Math.ceil(currentRotation / 360) * 360) + 2160 + targetDegrees;
-
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
                 isSpinning = false;
+
+                // 🎯 ከቆመበት ዲግሪ ላይ ተነስተን ቀስቱ (Pointer) ያለበትን ትክክለኛ ቁጥር የማውጫ ቀመር
+                const actualDegrees = totalRotation % 360;
+                
+                // ቀስቱ ያለው ከላይ (0 ዲግሪ/360 ዲግሪ) ስለሆነ፣ ዊሉ ወደ ቀኝ ሲዞር ኢንዴክሱ ወደኋላ ይቆጥራል
+                const segmentDegrees = 360 / numSegments;
+                let winningIndex = Math.floor((360 - actualDegrees) / segmentDegrees) % numSegments;
+                
+                // ኢንዴክሱ ከዜሮ በታች እንዳይሆን ማስተካከያ
+                if (winningIndex < 0) winningIndex += numSegments;
+                
+                const winningColor = colorsData[winningIndex];
 
                 let isWin = (selectedColorName === winningColor.name);
                 if (isWin) {
                     const winAmount = selectedBetAmount * 15; 
                     currentBalance += winAmount;
                     resultBox.className = "result-box win";
-                    resultBox.innerHTML = `🎉 አሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው: ${winningColor.name}<br>🎁 +${winAmount} ETB`;
+                    resultBox.innerHTML = `🎉 አሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው (ቀስቱ ላይ ያለው): ${winningColor.name}<br>🎁 +${winAmount} ETB`;
                 } else {
                     resultBox.className = "result-box lose";
-                    resultBox.innerHTML = `💔 ተሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው: ${winningColor.name}<br>📉 -${selectedBetAmount} ETB`;
+                    resultBox.innerHTML = `💔 ተሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው (ቀስቱ ላይ ያለው): ${winningColor.name}<br>📉 -${selectedBetAmount} ETB`;
                 }
 
                 document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
