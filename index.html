@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER 2026 COIN WHEEL</title>
+    <title>SUPER 2026 COIN WHEEL (20 SECTIONS)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -64,7 +64,7 @@
             height: 100%;
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(0,0,0,0.6);
-            transition: transform 4s cubic-bezier(0.1, 0.8, 0.2, 1);
+            transition: transform 5s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
         .section-title {
             font-size: 16px;
@@ -79,11 +79,14 @@
             max-width: 380px;
             margin-bottom: 15px;
         }
+        .grid-20 {
+            grid-template-columns: repeat(5, 1fr);
+        }
         .btn {
             background-color: #1c2538;
             border: 1px solid #34495e;
             color: white;
-            padding: 12px 2px;
+            padding: 10px 2px;
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
@@ -98,7 +101,7 @@
             border-color: #f1c40f;
         }
         .spin-btn {
-            grid-column: span 4;
+            grid-column: span 5;
             background-color: #e74c3c;
             color: white;
             font-size: 18px;
@@ -137,7 +140,7 @@
 
     <div class="wheel-outer">
         <div class="pointer"></div>
-        <canvas id="wheel" width="400" height="400"></canvas>
+        <canvas id="wheel" width="500" height="500"></canvas>
     </div>
 
     <div class="section-title">💵 የውርርድ መጠን ይምረጡ፦</div>
@@ -148,10 +151,10 @@
         <div class="btn bet-btn" onclick="selectBet(200, this)">200 ETB</div>
     </div>
 
-    <div class="section-title">🎯 የሚወጣውን ቀለም ይገምቱ (8 ቀለማት)፦</div>
-    <div class="grid-container" id="color-grid"></div>
+    <div class="section-title">🎯 የሚወጣውን ቁጥር/ቀለም ይገምቱ (1-20)፦</div>
+    <div class="grid-container grid-20" id="color-grid"></div>
 
-    <div class="grid-container">
+    <div class="grid-container grid-20">
         <button class="btn spin-btn" onclick="spinWheel()">🎡 አሽከርክር (SPIN)</button>
     </div>
 
@@ -167,13 +170,15 @@
 
         document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
 
-        // 🎨 ልክ እንደ ፎቶው 8ቱ ቀለማት ብቻ
-        const colorsData = [
-            { name: "ቀይ", hex: "#e74c3c" }, { name: "ጥቁር", hex: "#2c3e50" }, 
-            { name: "ሰማያዊ", hex: "#2980b9" }, { name: "ቢጫ", hex: "#f1c40f" },
-            { name: "አረንጓዴ", hex: "#2ecc71" }, { name: "ሐምራዊ", hex: "#9b59b6" }, 
-            { name: "ብርቱካን", hex: "#e67e22" }, { name: "ሮዝ", hex: "#e84393" }
-        ];
+        // 🎨 20 የተለያዩ ቀለማት እና ቁጥሮች
+        const baseColors = ["#e74c3c", "#2c3e50", "#2980b9", "#f1c40f", "#2ecc71", "#9b59b6", "#e67e22", "#e84393", "#1abc9c", "#34495e"];
+        const colorsData = [];
+        for (let i = 1; i <= 20; i++) {
+            colorsData.push({
+                name: "ቁጥር " + i,
+                hex: baseColors[(i - 1) % baseColors.length]
+            });
+        }
 
         let selectedBetAmount = 10;
         let selectedColorName = "";
@@ -183,8 +188,8 @@
         colorsData.forEach(c => { 
             const div = document.createElement('div');
             div.className = "btn color-btn";
-            div.innerText = c.name;
-            div.style.borderBottom = `4px solid ${c.hex}`;
+            div.innerText = c.name.replace("ቁጥር ", "");
+            div.style.backgroundColor = c.hex;
             div.onclick = function() { selectColor(c.name, this); };
             colorGrid.appendChild(div);
         });
@@ -195,15 +200,26 @@
         const anglePerSegment = (2 * Math.PI) / numSegments;
 
         function drawWheel() {
+            ctx.clearRect(0, 0, 500, 500);
             for (let i = 0; i < numSegments; i++) {
                 ctx.beginPath();
-                ctx.moveTo(200, 200);
-                ctx.arc(200, 200, 190, i * anglePerSegment, (i + 1) * anglePerSegment);
+                ctx.moveTo(250, 250);
+                ctx.arc(250, 250, 240, i * anglePerSegment, (i + 1) * anglePerSegment);
                 ctx.fillStyle = colorsData[i].hex;
                 ctx.fill();
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = "#131927";
                 ctx.stroke();
+
+                // 📝 ቁጥሮቹን በዊሉ ላይ መጻፍ
+                ctx.save();
+                ctx.translate(250, 250);
+                ctx.rotate(i * anglePerSegment + anglePerSegment / 2);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 16px Arial";
+                ctx.textAlign = "right";
+                ctx.fillText(colorsData[i].name.replace("ቁጥር ", ""), 220, 5);
+                ctx.restore();
             }
         }
         drawWheel();
@@ -225,7 +241,7 @@
         function spinWheel() {
             if (isSpinning) return;
             if (!selectedColorName) {
-                alert("እባክዎ መጀመሪያ የሚገምቱትን ቀለም ይምረጡ!");
+                alert("እባክዎ መጀመሪያ የሚገምቱትን ቁጥር ይምረጡ!");
                 return;
             }
             if (currentBalance < selectedBetAmount) {
@@ -243,7 +259,7 @@
             const winningIndex = Math.floor(Math.random() * numSegments);
             const winningColor = colorsData[winningIndex];
 
-            const extraSpins = 5 * 360; 
+            const extraSpins = 6 * 360; 
             const targetAngle = (numSegments - winningIndex - 0.5) * (360 / numSegments);
             const totalRotation = extraSpins + targetAngle;
 
@@ -253,11 +269,11 @@
                 isSpinning = false;
                 canvas.style.transition = "none";
                 canvas.style.transform = `rotate(${targetAngle}deg)`;
-                setTimeout(() => { canvas.style.transition = "transform 4s cubic-bezier(0.1, 0.8, 0.2, 1)"; }, 50);
+                setTimeout(() => { canvas.style.transition = "transform 5s cubic-bezier(0.1, 0.8, 0.2, 1)"; }, 50);
 
                 let isWin = (selectedColorName === winningColor.name);
                 if (isWin) {
-                    const winAmount = selectedBetAmount * 5; // 8 ቀለም ስለሆነ ካሸነፈ 5 እጥፍ ያገኛል
+                    const winAmount = selectedBetAmount * 15; // 20 እድል ስለሆነ ሲያሸንፍ 15 እጥፍ ያገኛል
                     currentBalance += winAmount;
                     resultBox.className = "result-box win";
                     resultBox.innerHTML = `🎉 አሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው: ${winningColor.name}<br>🎁 +${winAmount} ETB`;
@@ -269,7 +285,6 @@
                 document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
                 resultBox.style.display = "block";
                 
-                // 🔄 ተጫዋቹ ጨዋታውን ሲዘጋ ባላንሱ ወዲያው ለቦቱ እንዲተላለፍ ማድረግ
                 if (tg) {
                     tg.sendData(JSON.stringify({
                         status: isWin ? "win" : "lose",
@@ -279,7 +294,7 @@
                     }));
                 }
 
-            }, 4000);
+            }, 5000);
         }
     </script>
 </body>
