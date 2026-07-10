@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER 2026 COIN WHEEL (RESULT ON TOP)</title>
+    <title>SUPER 2026 COIN WHEEL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -66,7 +66,8 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.6);
             transition: transform 5s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
-        /* 📍 ውጤቱ የሚታይበት ሳጥን ስታይል - ከላይ እንዲሆን */
+        
+        /* 📍 ውጤቱ የሚታይበት ሳጥን - ከዊሉ በታች እንዲሆን ተደርጓል */
         .result-box {
             margin: 15px 0;
             padding: 15px;
@@ -76,7 +77,7 @@
             text-align: center;
             font-weight: bold;
             font-size: 16px;
-            display: none; /* መጀመሪያ ላይ አይታይም */
+            display: none; 
             animation: fadeIn 0.5s ease-in-out;
         }
         @keyframes fadeIn {
@@ -146,13 +147,12 @@
         <span>ETB</span>
     </div>
 
-    <!-- 🎡 ዊል -->
     <div class="wheel-outer">
         <div class="pointer"></div>
         <canvas id="wheel" width="500" height="500"></canvas>
     </div>
 
-    <!-- 📍 አዲስ ቦታ፦ ውጤቱ አሁን እዚህ ዊሉ ስር ወዲያውኑ ይታያል -->
+    <!-- 📍 ውጤቱ አሁን እዚህ ዊሉ ስር ነው የሚታየው -->
     <div id="result" class="result-box"></div>
 
     <div class="section-title">💵 የውርርድ መጠን ይምረጡ፦</div>
