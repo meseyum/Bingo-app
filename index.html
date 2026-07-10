@@ -67,7 +67,6 @@
             transition: transform 5s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
         
-        /* 📍 ውጤቱ የሚታይበት ሳጥን - ከዊሉ በታች እንዲሆን ተደርጓል */
         .result-box {
             margin: 15px 0;
             padding: 15px;
@@ -143,7 +142,8 @@
     
     <div class="balance-container">
         <span>💰 ባለንስዎ:</span>
-        <span id="balance-display" class="balance-amount">95.00</span>
+        <!-- 📍 መነሻ ባላንሱ እዚህ ወደ 10 ተቀይሯል -->
+        <span id="balance-display" class="balance-amount">10.00</span>
         <span>ETB</span>
     </div>
 
@@ -152,7 +152,6 @@
         <canvas id="wheel" width="500" height="500"></canvas>
     </div>
 
-    <!-- 📍 ውጤቱ አሁን እዚህ ዊሉ ስር ነው የሚታየው -->
     <div id="result" class="result-box"></div>
 
     <div class="section-title">💵 የውርርድ መጠን ይምረጡ፦</div>
@@ -175,7 +174,8 @@
         if(tg) tg.expand(); 
 
         const urlParams = new URLSearchParams(window.location.search);
-        let currentBalance = parseFloat(urlParams.get('balance')) || 95.00;
+        // 📍 ከዩአርኤል ካልመጣ በስተቀር መነሻው 10.00 እንዲሆን ተደርጓል
+        let currentBalance = parseFloat(urlParams.get('balance')) || 10.00;
 
         document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
 
@@ -262,6 +262,8 @@
             }
 
             isSpinning = true;
+            
+            // 📍 ሲጫወቱ ከባላንስ ላይ ውርርዱ ይቀነሳል
             currentBalance -= selectedBetAmount; 
             document.getElementById('balance-display').innerText = currentBalance.toFixed(2);
 
@@ -287,6 +289,7 @@
                 let isWin = (selectedColorName === winningColor.name);
                 if (isWin) {
                     const winAmount = selectedBetAmount * 15; 
+                    // 📍 ሲያሸንፉ ገንዘብ ይጨምራል
                     currentBalance += winAmount;
                     resultBox.className = "result-box win";
                     resultBox.innerHTML = `🎉 አሸንፈዋል!<br>የመረጡት: ${selectedColorName}<br>የወጣው (ቀስቱ ላይ ያለው): ${winningColor.name}<br>🎁 +${winAmount} ETB`;
